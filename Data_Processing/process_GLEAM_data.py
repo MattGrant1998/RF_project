@@ -108,7 +108,7 @@ def create_ET_data(GLEAM_version):
     E = xr.open_dataarray(data_path + 'E/E_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     T = xr.open_dataarray(data_path + 'T/T_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     ET = E + T
-
+    ET.rename('ET')
     ET_filepath = data_path + '/ET/'
     if not os.path.exists(ET_filepath):
         os.makedirs(ET_filepath)
