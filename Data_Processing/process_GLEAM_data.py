@@ -5,7 +5,7 @@ import itertools
 
 
 GLEAM_versions = [
-    # 'v3_8',
+    'v3_8',
     'v3_6',
 ]
 
@@ -125,15 +125,15 @@ def main():
     # for var, v in combinations:
     #     process_ET_products(var, v)
 
-    # combinations = itertools.product(
-    #     SM_vars,
-    #     GLEAM_versions
-    # )
-    # for var, v in combinations:
-    #     process_SM_products(var, v)
+    combinations = itertools.product(
+        SM_vars,
+        GLEAM_versions
+    )
+    for var, v in combinations:
+        process_SM_products(var, v)
 
-    for v in GLEAM_versions:
-        create_ET_data(v)
+    # for v in GLEAM_versions:
+    #     create_ET_data(v)
 
 if __name__ == "__main__":
     main()
