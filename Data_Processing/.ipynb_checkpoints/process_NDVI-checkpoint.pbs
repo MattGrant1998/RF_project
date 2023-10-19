@@ -2,7 +2,7 @@
 #PBS -P w97
 #PBS -q normal
 #PBS -l ncpus=8
-#PBS -l mem=100Gb
+#PBS -l mem=80Gb
 #PBS -l walltime=00:30:00
 #PBS -l jobfs=1gb
 #PBS -l wd
@@ -14,4 +14,4 @@ module use /g/data/hh5/public/modules
 module load conda/analysis3
  
 #python3 
-python3 /home/561/mg5624/RF_project/Data_Processing/create_predictors_dataframes.py
+python3 /home/561/mg5624/RF_project/Data_Processing/process_NDVI.py

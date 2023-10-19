@@ -5,7 +5,7 @@ import itertools
 
 
 GLEAM_versions = [
-    # 'v3_8',
+    'v3_8',
     'v3_6',
 ]
 
@@ -108,7 +108,7 @@ def create_ET_data(GLEAM_version):
     E = xr.open_dataarray(data_path + 'E/E_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     T = xr.open_dataarray(data_path + 'T/T_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     ET = E + T
-
+    ET.rename('ET')
     ET_filepath = data_path + '/ET/'
     if not os.path.exists(ET_filepath):
         os.makedirs(ET_filepath)
@@ -125,15 +125,15 @@ def main():
     # for var, v in combinations:
     #     process_ET_products(var, v)
 
-    # combinations = itertools.product(
-    #     SM_vars,
-    #     GLEAM_versions
-    # )
-    # for var, v in combinations:
-    #     process_SM_products(var, v)
+    combinations = itertools.product(
+        SM_vars,
+        GLEAM_versions
+    )
+    for var, v in combinations:
+        process_SM_products(var, v)
 
-    for v in GLEAM_versions:
-        create_ET_data(v)
+    # for v in GLEAM_versions:
+    #     create_ET_data(v)
 
 if __name__ == "__main__":
     main()

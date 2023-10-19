@@ -1,0 +1,19 @@
+non nan values before QC: <xarray.DataArray 'ndvi' ()>
+array(137838240)
+non-nan values after QC: <xarray.DataArray ()>
+array(3601447)
+non-nan values after manual QC: <xarray.DataArray ()>
+array(3601447)
+
+======================================================================================
+                  Resource Usage on 2023-10-17 14:50:55:
+   Job Id:             98308904.gadi-pbs
+   Project:            w97
+   Exit Status:        0
+   Service Units:      4.81
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:06:56        
+   Memory Requested:   80.0GB                Memory Used: 15.05GB         
+   Walltime requested: 00:30:00            Walltime Used: 00:07:13        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================

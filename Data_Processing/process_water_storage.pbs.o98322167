@@ -1,0 +1,14 @@
+=>> PBS: job killed: walltime 601 exceeded limit 600
+
+======================================================================================
+                  Resource Usage on 2023-10-17 17:33:33:
+   Job Id:             98322167.gadi-pbs
+   Project:            w97
+   Exit Status:        -29 (PBS Error -29)
+   Service Units:      2.72
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:09:56        
+   Memory Requested:   20.0GB                Memory Used: 13.89GB         
+   Walltime requested: 00:10:00            Walltime Used: 00:10:12        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================
