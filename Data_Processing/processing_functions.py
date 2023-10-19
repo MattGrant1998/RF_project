@@ -33,7 +33,7 @@ def constrain_to_australia(dataarray):
     dataset (xr.DataArray): dataset which has australia included in it
     """
     
-    if dataarray.coords['lat'][0].data < 0:
+    if dataarray.coords['lat'][0].data < dataarray.coords['lat'][-1].data:
         lat1 = -45
         lat2 = -9
     else:
@@ -53,11 +53,13 @@ def regrid_to_5km_grid(dataarray):
     dataarray (xr.DataArray): xarray array over Australia that requires regridding
     """
     # Load in precip dataset - which we want to regrid to
-    precip_ds = xr.open_dataset('/g/data/w97/amu561/AGCD_drought_metrics/AGCD_1900_2021/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
-    precip = precip_ds.precip
+    precip = xr.open_dataarray('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
+
+    # Remove time coordinate so left with just the lat/lon grid
+    grid = precip.isel(time=0).reset_coords(names='time', drop=True)
     
     # regrid runoff to precip
-    interpolated_dataarray = dataarray.interp_like(precip, method='nearest')
+    interpolated_dataarray = dataarray.interp_like(grid, method='nearest')
 
     return interpolated_dataarray
 
