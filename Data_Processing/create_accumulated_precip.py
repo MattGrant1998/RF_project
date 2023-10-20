@@ -17,9 +17,12 @@ def rename_and_save_precipitation_dataarray(precip_ds):
         precip_ds (xr.Dataset): dataset of AGCD precip
     """
     precip = precip_ds.precip
-    precip = precip.rename('Precipitation')
-    precip = processing_functions.constrain_to_australia(precip)
-    precip.to_netcdf('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
+    precip_renamed = precip.rename('Precipitation')
+    precip_constrained = processing_functions.constrain_to_australia(precip_renamed)
+    precip_year_month_dt = processing_functions.set_time_coord_to_year_month_datetime(precip_constrained)
+    print(precip_year_month_dt)
+    precip_year_month_dt.to_netcdf('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
+    
 
 def create_n_month_accumulated_precip_dataarray(precip, n_months):
     """

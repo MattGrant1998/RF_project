@@ -57,7 +57,7 @@ def constrain_and_regrid_dataset(dataarray):
 
 def process_ET_products(var, GLEAM_version):
     """
-    Conastrains E, T, and PET products to Australia and regrids to 0.05 degree grid.
+    Constrains E, T, and PET products to Australia and regrids to 0.05 degree grid.
     Args:
     var (str): shorthand name of variable as in original GLEAM file ('E', 'Et', or 'Ep')
     GLEAM_version (str): the GLEAM version required (e.g. v3_8)
@@ -69,6 +69,7 @@ def process_ET_products(var, GLEAM_version):
     new_var_name = ET_renaming[var]
     dataarray.name = new_var_name
     processed_dataarray = constrain_and_regrid_dataset(dataarray)
+    year_month_dt_dataarray = processing_functions.set_time_coord_to_year_month_datetime(processed_dataarray)
     filepath = processing_functions.my_data_dir + f'RF_project/ET_products/{GLEAM_version}/{new_var_name}/'
     
     if not os.path.exists(filepath):
@@ -89,6 +90,7 @@ def process_SM_products(var, GLEAM_version):
     v_number = GLEAM_version[-1]
     dataarray = xr.open_dataarray(GLEAM_data_path + f'{var}_1980-{final_year[GLEAM_version]}_GLEAM_v3.{v_number}a_MO.nc')
     processed_dataarray = constrain_and_regrid_dataset(dataarray)
+    year_month_dt_dataarray = processing_functions.set_time_coord_to_year_month_datetime(processed_dataarray)
     filepath = processing_functions.my_data_dir + f'RF_project/Soil_Moisture/{GLEAM_version}/{var}/'
 
     if not os.path.exists(filepath):
