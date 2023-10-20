@@ -38,18 +38,20 @@ COORDS = {
 
 VARS = {
     1981: ['Precipitation', 'Runoff', 'ENSO_index', 'PET'],
-    1980: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_12-Month_Precipitation', 'Runoff', 
-           'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMsurf', 'SMroot'],
+    1980: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
+           'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMsurf', 'SMroot'],
     
-    1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_12-Month_Precipitation', 
-           'Runoff', 'ENSO_index', 'IOD_index'],
+    1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
+           'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index'],
 }
 
 
 FILES = {
     'Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_monthly_1900_2021.nc',
     'Acc_3-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_3monthly_1900_2021.nc',
+    'Acc_6-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_6monthly_1900_2021.nc',
     'Acc_12-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_12monthly_1900_2021.nc',
+    'Acc_24-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_24monthly_1900_2021.nc',
     'Runoff': processing_functions.my_data_dir + 'RF_project/Runoff/AWRA/AWRAv7_Runoff_month_1911_2023.nc', 
     'ENSO_index': processing_functions.my_data_dir + 'RF_project/ENSO/ENSO_BEST_index_sorted.csv',
     'IOD_index': processing_functions.my_data_dir + 'RF_project/IOD/IOD_DMI_index_sorted.csv',
@@ -133,9 +135,10 @@ def read_csv_as_dataset(csv_file):
     if 'Unnamed: 0' in df.columns:
         df.drop('Unnamed: 0', axis=1, inplace=True)
         
-    df['time'] = df['Year_Month'] + '-16'
+    df['time'] = df['Year_Month'] + '-01'
     df['time'] = pd.to_datetime(df['time'])
-    
+
+    df.drop('Year_Month', axis=1, inplace=True)
     df.sort_values(by='time', inplace=True)
     df = df.set_index(['time'])
     ds = df.to_xarray()
@@ -167,7 +170,7 @@ def create_list_of_predictors_ds(start_year, end_year, area):
                              f'Expected .nc or .csv file got file: {file} instead')
         
         predictor_ds = constrain_data(predictor_ds, start_year, end_year, area)
-            
+
         if 'Year_Month' not in predictor_ds.coords.keys():
             predictor_ds = add_year_month_coord_to_dataarray(predictor_ds)
             
@@ -245,7 +248,7 @@ def main():
             predictors_ds = merge_datasets(
                 create_list_of_predictors_ds(start_year, end_year, area)
             )        
-            print(predictors_ds)   
+            print(predictors_ds['time'].values)   
             # Save predictors dataframe
             filepath = processing_functions.my_data_dir + '/RF_project/predictors_data/'
             filename = f'predictors_dataframe_{start_year}-{end_year}_{area}.csv'

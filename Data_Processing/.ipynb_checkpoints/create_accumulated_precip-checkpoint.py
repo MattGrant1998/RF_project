@@ -17,11 +17,13 @@ def rename_and_save_precipitation_dataarray(precip_ds):
         precip_ds (xr.Dataset): dataset of AGCD precip
     """
     precip = precip_ds.precip
-    precip = precip.rename('Precipitation')
-    precip = processing_functions.constrain_to_australia(precip)
-    precip.to_netcdf('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
+    precip_renamed = precip.rename('Precipitation')
+    precip_constrained = processing_functions.constrain_to_australia(precip_renamed)
+    precip_year_month_dt = processing_functions.set_time_coord_to_year_month_datetime(precip_constrained)
+    precip_year_month_dt.to_netcdf('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
+    
 
-def create_n_month_accumulated_precip_dataarray(precip, n_months):
+def create_n_month_accumulated_precip_dataarray(n_months):
     """
     Creates a dataarray of n-month accumulated precipitation.
     Saves resulting accumulated precip as netcdf file.
@@ -30,6 +32,7 @@ def create_n_month_accumulated_precip_dataarray(precip, n_months):
         precip (xr.DataArray): data array of monthly precipitation
         n_months (int): number of months to accumulate the precipitation over
     """ 
+    precip = xr.open_dataarray('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
     acc_precip = precip.rolling(time=n_months).sum()
     acc_precip = acc_precip.rename(f'Acc_{n_months}-Month_Precipitation')
     filepath = '/g/data/w97/mg5624/RF_project/Precipitation/AGCD/'
@@ -41,7 +44,7 @@ def main():
     rename_and_save_precipitation_dataarray(precip_ds)
     n_months = [3, 6, 12, 24, 36, 48]
     for n in n_months:
-        create_n_month_accumulated_precip_dataarray(precip, n)
+        create_n_month_accumulated_precip_dataarray(n)
 
 
 if __name__ == "__main__":

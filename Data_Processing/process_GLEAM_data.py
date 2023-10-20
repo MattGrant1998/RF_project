@@ -76,7 +76,7 @@ def process_ET_products(var, GLEAM_version):
         os.makedirs(filepath)
         
     filename = f'{new_var_name}_1980-{final_year[GLEAM_version]}_GLEAM_v3.{v_number}a_MO_Australia_0.05grid.nc'
-    processed_dataarray.to_netcdf(filepath + filename)
+    year_month_dt_dataarray.to_netcdf(filepath + filename)
 
 
 def process_SM_products(var, GLEAM_version):
@@ -97,7 +97,7 @@ def process_SM_products(var, GLEAM_version):
         os.makedirs(filepath)
 
     filename = f'{var}_1980-{final_year[GLEAM_version]}_GLEAM_v3.{v_number}a_MO_Australia_0.05grid.nc'
-    processed_dataarray.to_netcdf(filepath + filename)
+    year_month_dt_dataarray.to_netcdf(filepath + filename)
 
 
 def create_ET_data(GLEAM_version):
@@ -110,7 +110,7 @@ def create_ET_data(GLEAM_version):
     E = xr.open_dataarray(data_path + 'E/E_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     T = xr.open_dataarray(data_path + 'T/T_1980-2021_GLEAM_v3.6a_MO_Australia_0.05grid.nc')
     ET = E + T
-    ET.rename('ET')
+    ET = ET.rename('ET')
     ET_filepath = data_path + '/ET/'
     if not os.path.exists(ET_filepath):
         os.makedirs(ET_filepath)
@@ -120,22 +120,13 @@ def create_ET_data(GLEAM_version):
 
 
 def main():
-    # combinations = itertools.product(
-    #     ET_vars,
-    #     GLEAM_versions
-    # )
-    # for var, v in combinations:
-    #     process_ET_products(var, v)
+    for var in ET_vars:
+        process_ET_products(var, 'v3_6')
+        
+    for var in SM_vars:
+        process_SM_products(var, 'v3_8')
 
-    combinations = itertools.product(
-        SM_vars,
-        GLEAM_versions
-    )
-    for var, v in combinations:
-        process_SM_products(var, v)
-
-    # for v in GLEAM_versions:
-    #     create_ET_data(v)
+    create_ET_data('v3_6')
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ home_dir = '/home/561/mg5624/RF_project/'
 my_data_dir = '/g/data/w97/mg5624/'
 shared_data_dir = '/g/data/w97/Shared_data/Observations/'
 
+
 def rename_coord_titles_to_lat_long(dataset):
     """
     Changes the titles of the coordinates to lat long to keep it consistent
@@ -108,4 +109,25 @@ def check_leap_year(year):
             return True
     else:
         return False
-        
+
+
+def set_time_coord_to_year_month_datetime(data):
+    """
+    Sets the time coordinate of the data to be year-month datetime format.
+
+    Args:
+        data (xr.Dataset or xr.DataArray): data for which time coord needs edited
+
+    Returns:
+        data_out (xr.Dataset or xr.DataArray): data with year-month time coord
+    """
+    time = data['time'].values
+    
+    # Time in year-month datetime format
+    year_month_time = [pd.to_datetime(dt).replace(day=1) for dt in time]
+
+    # Replace time coordinate with year-month datetime
+    data_out = data.assign_coords(time=year_month_time)
+
+    return data_out
+

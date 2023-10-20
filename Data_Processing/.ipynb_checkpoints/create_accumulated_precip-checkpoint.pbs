@@ -2,8 +2,8 @@
 #PBS -P w97
 #PBS -q normal
 #PBS -l ncpus=8
-#PBS -l mem=20Gb
-#PBS -l walltime=00:10:00
+#PBS -l mem=30Gb
+#PBS -l walltime=00:20:00
 #PBS -l jobfs=1gb
 #PBS -l wd
 #PBS -l storage=gdata/hh5+gdata/w97+gdata/ua8

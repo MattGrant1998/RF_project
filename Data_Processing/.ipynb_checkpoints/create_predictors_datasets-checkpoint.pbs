@@ -2,8 +2,8 @@
 #PBS -P w97
 #PBS -q normal
 #PBS -l ncpus=8
-#PBS -l mem=50Gb
-#PBS -l walltime=00:30:00
+#PBS -l mem=25Gb
+#PBS -l walltime=00:15:00
 #PBS -l jobfs=1gb
 #PBS -l wd
 #PBS -l storage=gdata/hh5+gdata/w97+gdata/ua8
@@ -13,5 +13,5 @@
 module use /g/data/hh5/public/modules
 module load conda/analysis3
  
-#python3 
+#python3
 python3 /home/561/mg5624/RF_project/Data_Processing/create_predictors_datasets.py
