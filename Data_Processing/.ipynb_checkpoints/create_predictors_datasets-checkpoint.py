@@ -11,11 +11,17 @@ ET_filepath = processing_functions.my_data_dir + 'RF_project/ET_products/v3_6/'
 SM_filepath = processing_functions.my_data_dir + 'RF_project/Soil_Moisture/v3_8/'
 
 
-TIME_PERIODS = [
-    # [1981, 1983],
-    [1980, 2022], 
-    [1911, 2022]
+MODEL_TYPES = [
+    'full', 
+    'long_ts',
+    # 'test'
 ]
+
+TIME_PERIODS = {
+    'test': [1981, 1983],
+    'full': [1980, 2022], 
+    'long_ts': [1911, 2022]
+}
 
 
 AREAS = [
@@ -227,7 +233,6 @@ def convert_dataset_to_dataframe(predictors_ds):
     coord_rename = {
         'lon': 'Longitude',
         'lat': 'Latitude',
-        'time': 'Time',
     }
     
     predictors_df.rename(columns=coord_rename, inplace=True)
@@ -241,20 +246,32 @@ def convert_dataset_to_dataframe(predictors_ds):
 
 def main():
     for area in AREAS:
-        for time_period in TIME_PERIODS:
+        print(area)
+        for model in MODEL_TYPES:
+            time_period = TIME_PERIODS[model]
             start_year = time_period[0]
             end_year = time_period[-1]
 
             predictors_ds = merge_datasets(
                 create_list_of_predictors_ds(start_year, end_year, area)
             )        
-            print(predictors_ds['time'].values)   
+            print(predictors_ds['time'])
+            predictors_df = predictors_ds.to_dataframe()
             # Save predictors dataframe
-            filepath = processing_functions.my_data_dir + '/RF_project/predictors_data/'
-            filename = f'predictors_dataframe_{start_year}-{end_year}_{area}.csv'
+            filepath = processing_functions.my_data_dir + f'/RF_project/predictors_data/{model}_model/'
+            if not os.path.exists(filepath):
+                os.makedirs(filepath)
+                
+            filename_nc = f'predictors_dataset_{start_year}-{end_year}_{area}.nc'
+            filename_csv = f'predictors_dataframe_{start_year}-{end_year}_{area}.csv'
             
-            predictors_ds.to_netcdf(filepath + filename)
+            predictors_ds.to_netcdf(filepath + filename_nc)
+            predictors_df.to_csv(filepath + filename_csv)
 
+# def main2():
+#     predictors_ds = xr.open_dataset(processing_functions.my_data_dir + '/RF_project/predictors_data/predictors_dataset_1911-2022_SE_australia.nc')
+#     predictors_df = predictors_ds.to_dataframe()
+#     predictors_df.to_csv(processing_functions.my_data_dir + '/RF_project/predictors_data/predictors_dataframe_1911-2022_SE_australia.csv')
 
 if __name__ == "__main__":
     main()
