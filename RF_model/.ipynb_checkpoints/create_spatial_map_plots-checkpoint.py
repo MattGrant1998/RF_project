@@ -53,15 +53,15 @@ TIME_PERIODS = [
 
 known_droughts = {
     '1980': ['1982-83', 
-             'millenium', 
-             'tinderbox'
+             # 'millenium', 
+             # 'tinderbox'
             ],
     '1911': ['1914-15', 
              'WWII', 
              '1965-68', 
              '1982-83', 
-             'millenium', 
-             'tinderbox'
+             # 'millenium', 
+             # 'tinderbox'
             ],
 }
 
@@ -325,6 +325,7 @@ def main():
                 create_monthly_drought_proba_or_event_maps_for_specified_year(DATA_EVENT[model], year, model, 'Event')
 
                 anom_drought_proba = create_anomaly_from_mean_proba(DATA_PROBA[model])
+                print(anom_drought_proba)
                 create_monthly_drought_proba_or_event_maps_for_specified_year(anom_drought_proba, year, model, 'Probability Anomaly')
 
 
