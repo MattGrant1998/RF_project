@@ -1,0 +1,89 @@
+[[[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]]
+
+ [[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]]
+
+ [[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]]
+
+ ...
+
+ [[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [102.89296  105.34247  104.01963  ... 105.74643  105.29757  105.11757 ]
+  [103.60893  102.332565 103.22952  ... 100.79636  101.585434 102.21866 ]
+  [102.94819  100.41064  105.79787  ...  93.1553   102.70064   98.830414]]
+
+ [[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [122.1581   122.89839  123.16526  ... 121.0081   121.12696  119.76505 ]
+  [123.39322  121.403786 123.25851  ... 117.83166  120.30791  119.66014 ]
+  [116.5706   114.6746   118.594574 ... 112.32115  117.84003  116.06689 ]]
+
+ [[       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  [       nan        nan        nan ...        nan        nan        nan]
+  ...
+  [165.84491  168.71016  169.52235  ... 169.94519  167.12534  168.09906 ]
+  [129.52486  128.82393  130.92812  ... 129.98994  129.21413  126.95128 ]
+  [130.7803   127.61739  130.32355  ... 127.606384 127.538956 130.90787 ]]]
+before regrid water 
+: <xarray.Dataset>
+Dimensions:  (time: 996, lat: 721, lon: 1440)
+Coordinates:
+  * time     (time) datetime64[ns] 1940-01-16 1940-02-16 ... 2022-12-16
+  * lat      (lat) float32 90.0 89.75 89.5 89.25 ... -89.25 -89.5 -89.75 -90.0
+  * lon      (lon) float32 0.0 0.25 0.5 0.75 1.0 ... -1.25 -1.0 -0.75 -0.5 -0.25
+Data variables:
+    TWSA     (time, lat, lon) float32 nan nan nan nan ... 127.6 127.5 130.9
+aus water:
+ <xarray.Dataset>
+Dimensions:  (time: 996, lat: 691, lon: 861)
+Coordinates:
+  * time     (time) datetime64[ns] 1940-01-16 1940-02-16 ... 2022-12-16
+  * lat      (lat) float32 -44.5 -44.45 -44.4 -44.35 ... -10.1 -10.05 -10.0
+  * lon      (lon) float32 112.0 112.1 112.1 112.2 ... 154.9 154.9 154.9 155.0
+Data variables:
+    TWSA     (time, lat, lon) float32 nan nan nan nan nan ... nan nan nan nan
+CWS:
+ <xarray.Dataset>
+Dimensions:  (time: 995, lat: 691, lon: 861)
+Coordinates:
+  * time     (time) datetime64[ns] 1940-02-16 1940-03-16 ... 2022-12-16
+  * lat      (lat) float32 -44.5 -44.45 -44.4 -44.35 ... -10.1 -10.05 -10.0
+  * lon      (lon) float32 112.0 112.1 112.1 112.2 ... 154.9 154.9 154.9 155.0
+Data variables:
+    TWSA     (time, lat, lon) float32 nan nan nan nan nan ... nan nan nan nan
+
+======================================================================================
+                  Resource Usage on 2023-10-27 11:34:34:
+   Job Id:             99076267.gadi-pbs
+   Project:            w97
+   Exit Status:        0
+   Service Units:      0.39
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:00:54        
+   Memory Requested:   30.0GB                Memory Used: 21.09GB         
+   Walltime requested: 00:30:00            Walltime Used: 00:01:27        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================

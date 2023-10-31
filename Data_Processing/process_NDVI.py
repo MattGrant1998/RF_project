@@ -7,6 +7,33 @@ import os
 # def find_max_monthly_values(
 filepath_in = '/g/data/w97/mg5624/RF_project/NDVI/orders/98eac55928c915bdb7c8ff216de8d980/Global_Veg_Greenness_GIMMS_3G/data/'
 
+
+def perform_QC_on_NDVI(filepath_in):
+    """
+    Performs quality control checks on the NDVI data.
+
+    Args:
+        filepath_in (str): filepath to the raw NDVI data
+    """
+    NDVI_data = xr.open_mfdataset(filepath_in + '/*', combine='by_coords')
+    NDVI_aus = processing_functions.constrain_to_australia(NDVI_data)
+
+    NDVI = NDVI_aus.ndvi.compute()
+    print("non nan values before QC:", NDVI.count())
+    
+    QC = NDVI_aus_regrid.percentile.compute()
+    NDVI_QC1 = xr.where(QC < 3, NDVI, np.nan)
+    # print(NDVI_missing, NDVI_missing.count())
+    print('non-nan values after QC1:', NDVI_QC1.count())
+    
+    NDVI_QC2 = xr.where(QC < 2, NDVI, np.nan)
+    print('non-nan values after QC2:', NDVI_QC2.count())
+    # Remove values outside of valid range [-0.3, 1] or QC = 2 or 3 (where NDVI is taken from seasonal profile or missing)
+    NDVI_valid = xr.where((NDVI >= -0.3) | (NDVI <= 1), NDVI, np.nan)
+    print('non-nan values after manual QC2:', NDVI_valid.compute().count())
+    
+
+    
 def combine_NDVI_files_over_australia(filepath_in, save_file=False, filepath_out=None):
     """
     Takes in NDVI files for various years of data and combines them all into one file.
@@ -20,23 +47,10 @@ def combine_NDVI_files_over_australia(filepath_in, save_file=False, filepath_out
     Returns:
         NDVI (xr.DataArray): dataarray of the combined timeseires for NDVI
     """
-    NDVI_data = xr.open_mfdataset(filepath_in + '/*', combine='by_coords')
+    NDVI_data = xr.open_mfdataset(filepath_in + '/*', combine='by_coords', engine='netcdf4')
     NDVI_aus = processing_functions.constrain_to_australia(NDVI_data)
     NDVI_aus_regrid = processing_functions.regrid_to_5km_grid(NDVI_aus)
-    NDVI = NDVI_aus_regrid.ndvi.compute()
-    print("non nan values before QC:", NDVI.count())
-    
-    QC = NDVI_aus_regrid.percentile.compute()
-    print(QC)
-    NDVI_missing = xr.where(QC == 3, NDVI, np.nan)
-    print(NDVI_missing, NDVI_missing.count())
-    print('non-nan values after QC1:', NDVI.count())
-    
-    NDVI = xr.where(QC < 2, NDVI, np.nan)
-    print('non-nan values after QC2:', NDVI.count())
-    # Remove values outside of valid range [-0.3, 1] or QC = 2 or 3 (where NDVI is taken from seasonal profile or missing)
-    NDVI_valid = xr.where((NDVI >= -0.3) | (NDVI <= 1), NDVI, np.nan)
-    print('non-nan values after manual QC2:', NDVI_valid.compute().count())
+
     
     if save_file:
         if filepath_out == None:
@@ -54,8 +68,8 @@ def combine_NDVI_files_over_australia(filepath_in, save_file=False, filepath_out
 
 filepath = '/g/data/w97/mg5624/RF_project/NDVI/australia/'
 filename = 'ndvi3g_geo_v1_1_1982-2022_bimonthly_0.05grid.nc'
-
-combine_NDVI_files_over_australia(filepath_in)
+perform_QC_on_NDVI('/g/data/w97/mg5624/RF_project/NDVI/orders/98eac55928c915bdb7c8ff216de8d980/Global_Veg_Greenness_GIMMS_3G/')
+# combine_NDVI_files_over_australia(filepath_in)
 
 # NDVI = NDVI.compute()
 

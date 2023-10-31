@@ -1,0 +1,41 @@
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:159: RuntimeWarning: 'netcdf4' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:159: RuntimeWarning: 'h5netcdf' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:159: RuntimeWarning: 'scipy' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:168: RuntimeWarning: 'netcdf4' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:168: RuntimeWarning: 'h5netcdf' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py:168: RuntimeWarning: 'scipy' fails while guessing
+  warnings.warn(f"{engine!r} fails while guessing", RuntimeWarning)
+Traceback (most recent call last):
+  File "/home/561/mg5624/RF_project/Data_Processing/process_NDVI.py", line 71, in <module>
+    perform_QC_on_NDVI('/g/data/w97/mg5624/RF_project/NDVI/orders/98eac55928c915bdb7c8ff216de8d980/Global_Veg_Greenness_GIMMS_3G/')
+  File "/home/561/mg5624/RF_project/Data_Processing/process_NDVI.py", line 18, in perform_QC_on_NDVI
+    NDVI_data = xr.open_mfdataset(filepath_in + '/*', combine='by_coords')
+  File "/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/api.py", line 1027, in open_mfdataset
+    datasets = [open_(p, **open_kwargs) for p in paths]
+  File "/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/api.py", line 1027, in <listcomp>
+    datasets = [open_(p, **open_kwargs) for p in paths]
+  File "/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/api.py", line 554, in open_dataset
+    engine = plugins.guess_engine(filename_or_obj)
+  File "/home/561/mg5624/.local/lib/python3.9/site-packages/xarray/backends/plugins.py", line 197, in guess_engine
+    raise ValueError(error_msg)
+ValueError: did not find a match in any of xarray's currently installed IO backends ['netcdf4', 'h5netcdf', 'scipy', 'cfgrib', 'cfradial1', 'furuno', 'gamic', 'gini', 'iris', 'odim', 'pydap', 'radolan', 'rainbow', 'rasterio', 'wradlib-cfradial1', 'wradlib-cfradial2', 'wradlib-furuno', 'wradlib-gamic', 'wradlib-iris', 'wradlib-odim', 'wradlib-rainbow', 'zarr']. Consider explicitly selecting one of the installed engines via the ``engine`` parameter, or installing additional IO dependencies, see:
+https://docs.xarray.dev/en/stable/getting-started-guide/installing.html
+https://docs.xarray.dev/en/stable/user-guide/io.html
+
+======================================================================================
+                  Resource Usage on 2023-10-27 10:48:50:
+   Job Id:             99073211.gadi-pbs
+   Project:            w97
+   Exit Status:        1
+   Service Units:      0.17
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:00:08        
+   Memory Requested:   80.0GB                Memory Used: 650.91MB        
+   Walltime requested: 00:30:00            Walltime Used: 00:00:15        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================

@@ -32,8 +32,8 @@ AREAS = [
 
 COORDS = {
     'SE_australia': {
-        'lats': (-38, -27),
-        'lons': (140, 154)
+        'lats': (-40, -29),
+        'lons': (139, 155)
     },
     'test': {
         'lats': (-32, -28),

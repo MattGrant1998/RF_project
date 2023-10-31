@@ -50,10 +50,15 @@ def create_dataset_from_mat_data(mat_data, variable_name):
 
     # Replace the nan values with np.nan so we can remove them later
     data_arr = arrays[data_var]
-    non_numbers_mask = np.isnan(data_arr.astype(float))
+    # non_numbers_mask = np.isnan(data_arr.astype(float))
+    data_arr = np.ma.masked_invalid(data_arr)
+    data_arr = data_arr.filled(np.nan)
     np.set_printoptions(threshold=sys.maxsize)
-    print(data_arr[non_numbers_mask])
-    data_arr[non_numbers_mask] = np.nan
+    print(data_arr)
+    print(data_arr.shape)
+    print(data_ar.isna().shape()
+    # print(data_arr[non_numbers_mask])
+    # data_arr[non_numbers_mask] = np.nan
     
     for coord in dims:
         data[coord] = arrays[coord]
@@ -93,7 +98,7 @@ def convert_mat_to_nc(mat_filepath, save_file=True, filepath_out=None):
             )
         else:
             dataset.to_netcdf(filepath_out)
-    print(dataset)
+    
     return dataset
 
 
@@ -124,7 +129,7 @@ def calculate_CWS_and_save_file(water_storage_data, filepath_out):
         water_storage_data (xr.DataArray): water storage dataset
         filepath_out (str): filepath where the change in water stroage file is to be saved
     """
-    print('before regrid water \n:', water_storage_data)
+    print('before regrid water \n:', water_storage_data['lon'].values)
     aus_water_storage = constrain_and_regrid_water_storage(water_storage_data)
     print('aus water:\n', aus_water_storage)
     CWS = aus_water_storage.diff(dim='time', n=1)
