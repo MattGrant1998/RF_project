@@ -117,7 +117,7 @@ def load_drought_data(model, measure):
     """"
     Loads drought data
     """
-    file = datadir + f'/{model}_model/drought_prediction_dataset_{model}_model.nc'
+    file = datadir + f'drought_prediction/{model}_model/drought_prediction_dataset_{model}_model.nc'
     drought_ds = xr.open_dataset(file)
     
     measure_dict = {
@@ -141,18 +141,18 @@ test_type = [
 def main():
     for measure in MEASURES:
         for model in MODELS:
-            # save_stat_test_df(
-            #     calculate_DW_score(
-            #         load_drought_data(measure, model)
-            #     ), 'DW', model, measure
-            # )
+            save_stat_test_df(
+                calculate_DW_score(
+                    load_drought_data(model, measure)
+                ), 'DW', model, measure
+            )
 
-            for type in test_type:
-                save_stat_test_df(
-                    find_MK_trendtest(
-                        load_drought_data(measure, model), type
-                    ), 'MK', model, measure, test_type=type
-                )
+            # for type in test_type:
+            #     save_stat_test_df(
+            #         find_MK_trendtest(
+            #             load_drought_data(model, measure), type
+            #         ), 'MK', model, measure, test_type=type
+            #     )
 
 
 if __name__ == "__main__":
