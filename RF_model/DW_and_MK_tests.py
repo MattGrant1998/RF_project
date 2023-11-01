@@ -96,26 +96,38 @@ def find_MK_trendtest(data, test_type):
     return MK_df
 
 
-def save_stat_test_df(df, stat_test, model, measure, test_type='original'):
+def save_stat_test_df(df, stat_test, model_type, measure, test_type='original'):
     """
-    Saves df
+    Saves stats test data as csv file.
+
+    Args:
+        df (pd.DataFrame): dataframe of stats test to save
+        stat_test (str): statistical test which the data is for ('MK' or 'DW')
+        model_type (str): the model type which the data is for ('1980' or '1911')
+        measure (str): the drought measure ('events' or 'proba')
+        test_type (str): matters for stat_test = 'MK' only, type of MK test that was conducted
+                         ('original' (default) or 'hamed_rao')
     """
-    filepath = datadir + f'{stat_test}_test/drought_{measure}/{model}_model/'
+    filepath = datadir + f'{stat_test}_test/drought_{measure}/{model_type}_model/'
 
     if not os.path.exists(filepath):
         os.makedirs(filepath)
 
     if stat_test == 'MK':
-        filename = f'{test_type}_{stat_test}_test_drought_prediction_{model}_model.csv'
+        filename = f'{test_type}_{stat_test}_test_drought_prediction_{model_type}_model.csv'
     else:
-        filename = f'{stat_test}_test_drought_{measure}_{model}_model.csv'
+        filename = f'{stat_test}_test_drought_{measure}_{model_type}_model.csv'
 
     df.to_csv(filepath + filename)
 
 
 def load_drought_data(model, measure):
     """"
-    Loads drought data
+    Loads drought data.
+
+    Args:
+        model (str): the model of required data ('1980' or '1911')
+        measure (str): the drought measure to load ('events' or 'proba')
     """
     file = datadir + f'drought_prediction/{model}_model/drought_prediction_dataset_{model}_model.nc'
     drought_ds = xr.open_dataset(file)
@@ -130,8 +142,24 @@ def load_drought_data(model, measure):
     return data
 
 
+def create_events_per_year_data(drought_events_data):
+    """
+    Finds the number of drought events per year for each grid cell.
+
+    Args:
+        drought_events_data (xr.DataArray): drought event data (monthly timescale)
+
+    Returns:
+        drought_events_per_year (xr.DataArray): number of events per year
+    """
+    drought_events_per_year = drought_events_data.groupby('time.year').sum(dim='time')
+    drought_events_per_year = drought_events_per_year.rename({'year': 'time'})
+
+    return drought_events_per_year
+    
+
 MODELS = ['1911', '1980']
-MEASURES = ['proba']
+MEASURES = ['proba', 'events']
 test_type = [
     # 'original',
     'hamed_rao'
@@ -141,18 +169,18 @@ test_type = [
 def main():
     for measure in MEASURES:
         for model in MODELS:
-            save_stat_test_df(
-                calculate_DW_score(
-                    load_drought_data(model, measure)
-                ), 'DW', model, measure
-            )
+            # save_stat_test_df(
+            #     calculate_DW_score(
+            #         load_drought_data(model, measure)
+            #     ), 'DW', model, measure
+            # )
 
-            # for type in test_type:
-            #     save_stat_test_df(
-            #         find_MK_trendtest(
-            #             load_drought_data(model, measure), type
-            #         ), 'MK', model, measure, test_type=type
-            #     )
+            for type in test_type:
+                save_stat_test_df(
+                    find_MK_trendtest(
+                        load_drought_data(model, measure), type
+                    ), 'MK', model, measure, test_type=type
+                )
 
 
 if __name__ == "__main__":
