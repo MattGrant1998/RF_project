@@ -11,6 +11,22 @@ datadir = '/g/data/w97/mg5624/RF_project/'
 plotdir = '/g/data/w97/mg5624/plots/RF_project/results_analysis/'
 
 
+def create_events_per_year_data(drought_events_data):
+    """
+    Finds the number of drought events per year for each grid cell.
+
+    Args:
+        drought_events_data (xr.DataArray): drought event data (monthly timescale)
+
+    Returns:
+        drought_events_per_year (xr.DataArray): number of events per year
+    """
+    drought_events_per_year = drought_events_data.groupby('time.year').sum(dim='time')
+    drought_events_per_year = drought_events_per_year.rename({'year': 'time'})
+
+    return drought_events_per_year
+
+
 def calculate_DW_score(data, DW_upper_bound=2.5, DW_lower_bound=1.5):
     """
     Calculates the DW score for each grid point of the input data.
@@ -40,6 +56,7 @@ def calculate_DW_score(data, DW_upper_bound=2.5, DW_lower_bound=1.5):
 
     DW_df.drop('latlon', axis=1, inplace=True)
     return DW_df
+
 
 def calculate_DW_group(group, data_name, DW_upper_bound, DW_lower_bound):
     lat, lon = group["lat"].iloc[0], group["lon"].iloc[0]
@@ -82,14 +99,16 @@ def find_MK_trendtest(data, test_type):
 
             # if all values are nan, then skip this grid point
             if data_ij_df[data_name].isnull().values.all():
-                break
-
-            if test_type == 'original':
-                MK_result = mk.original_test(data_ij_df[data_name].values)
-            elif test_type == 'hamed_rao':
-                MK_result = mk.hamed_rao_modification_test(data_ij_df[data_name].values)
-
-            MK_dict = {'lat': i, 'lon': j, 'MK_trend': MK_result.trend, 'MK_slope': MK_result.slope}
+                MK_dict = {'lat': i, 'lon': j, 'MK_trend': np.nan, 'MK_slope': np.nan}
+                # break
+            else:
+                if test_type == 'original':
+                    MK_result = mk.original_test(data_ij_df[data_name].values)
+                elif test_type == 'hamed_rao':
+                    MK_result = mk.hamed_rao_modification_test(data_ij_df[data_name].values)
+    
+                MK_dict = {'lat': i, 'lon': j, 'MK_trend': MK_result.trend, 'MK_slope': MK_result.slope}
+                
             MK_df_ij = pd.DataFrame([MK_dict])
             MK_df = pd.concat((MK_df, MK_df_ij))
 
@@ -139,48 +158,41 @@ def load_drought_data(model, measure):
 
     data = measure_dict[measure]
 
+    if measure == 'events':
+        data = create_events_per_year_data(data)
+
     return data
-
-
-def create_events_per_year_data(drought_events_data):
-    """
-    Finds the number of drought events per year for each grid cell.
-
-    Args:
-        drought_events_data (xr.DataArray): drought event data (monthly timescale)
-
-    Returns:
-        drought_events_per_year (xr.DataArray): number of events per year
-    """
-    drought_events_per_year = drought_events_data.groupby('time.year').sum(dim='time')
-    drought_events_per_year = drought_events_per_year.rename({'year': 'time'})
-
-    return drought_events_per_year
     
 
-MODELS = ['1911', '1980']
-MEASURES = ['proba', 'events']
+MODELS = [
+    '1911', 
+    # '1980'
+]
+MEASURES = [
+    'proba', 
+    # 'events'
+]
 test_type = [
-    # 'original',
-    'hamed_rao'
+    'original',
+    # 'hamed_rao'
 ]
 
 
 def main():
     for measure in MEASURES:
         for model in MODELS:
-            # save_stat_test_df(
-            #     calculate_DW_score(
-            #         load_drought_data(model, measure)
-            #     ), 'DW', model, measure
-            # )
+            save_stat_test_df(
+                calculate_DW_score(
+                    load_drought_data(model, measure)
+                ), 'DW', model, measure
+            )
 
-            for type in test_type:
-                save_stat_test_df(
-                    find_MK_trendtest(
-                        load_drought_data(model, measure), type
-                    ), 'MK', model, measure, test_type=type
-                )
+            # for type in test_type:
+            #     save_stat_test_df(
+            #         find_MK_trendtest(
+            #             load_drought_data(model, measure), type
+            #         ), 'MK', model, measure, test_type=type
+            #     )
 
 
 if __name__ == "__main__":

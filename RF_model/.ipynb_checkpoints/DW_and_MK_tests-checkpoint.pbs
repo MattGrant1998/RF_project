@@ -2,7 +2,7 @@
 #PBS -P w97
 #PBS -q normal
 #PBS -l ncpus=8
-#PBS -l mem=30Gb
+#PBS -l mem=50Gb
 #PBS -l walltime=04:00:00
 #PBS -l jobfs=1gb
 #PBS -l wd
