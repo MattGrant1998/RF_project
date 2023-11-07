@@ -27,6 +27,12 @@ predictors_new = [
     'Mean_24-Month_SMroot', 'Sin_month', 'Cos_month'
 ]
 
+predictors_new_simplified = [
+    'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 
+    'SAM_index', 'Mean_12-Month_ET', 'Mean_12-Month_PET', 'Mean_12-Month_SMsurf', 'Mean_12-Month_SMroot', 
+    'Sin_month', 'Cos_month'
+]
+
 # predictors with all variables
 predictors_1980 = [
     'Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 
@@ -39,8 +45,13 @@ predictors_1980 = [
 # predictors of variables with timeseries back to 1950 or ealier (these go back to at least 1911)
 predictors_1911 = [
     'Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 
-    'Acc_12-Month_Precipitation', 'Acc_24-Month_Precipitation', 'Acc_12-Month_Precipitation', 
+    'Acc_12-Month_Precipitation', 'Acc_24-Month_Precipitation', 
     'Runoff', 'ENSO_index', 'IOD_index', 'Sin_month', 'Cos_month'
+]
+
+
+predictors_1911_simp = [
+    'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 'Sin_month', 'Cos_month'
 ]
 
 variable_to_label = {
@@ -84,21 +95,27 @@ variable_to_label = {
 target = 'Drought'
 
 model_types = [
-    '1980',
+    # '1980',
     '1911',
-    'new',
+    '1911_simp',
+    # 'new',
+    # 'new_simp',
 ]
 
 model_title = {
         "1980": "1980",
-        "1911": "Long TS",
+        "1911": "1911",
+        "1911_simp": "1911 (simplified)"
         "new": "New",
+        "new_simp": "New (simplified)"
     }
 
 predictors_dict = {
     '1980': predictors_1980,
     '1911': predictors_1911,
+    '1911_simp': predictors_1911_simp
     'new': predictors_new,
+    'new_simp': predictors_new_simplified,
 }
 
 y = training_data['Drought']
@@ -176,6 +193,60 @@ def create_performance_metric_bar_chart(performance_df, random_seed, model_type)
     plt.close()
 
 
+def create_bar_chart_to_compare_two_performance_metrics(
+    performance_df_model1, performance_df_model2, model1_name, model2_name, random_seed
+):
+    """
+    Creates a bar plot to compare the performance metrics of the 1980 model and
+    long timeseries model.
+    
+    Args:
+        performance_df_1980 (pd.DataFrame): the performance metrics for model 1
+        performance_df_1911 (pd.DataFrame): the performance metrics for the model 2
+        model1_name (str): name of model 1
+        model2_name (str): name of model 2
+        random_seed (int or str):  if performance metrics from one random_seed then integer value of that seed,
+        if performance metrics are averaged from many random_seeds then "average_score"
+    """
+    # Create a barplot comparing the scores of the two models
+    performance_frames = [performance_df_model1, performance_df_model2]
+    concat_performance_df = pd.concat(performance_frames)
+    
+    model1_title, model2_title = model_title[model1_name], model_title[model2_name]
+    concat_performance_df.index = [model1_title, model2_title]
+    concat_performance_df = concat_performance_df.T
+    
+    ax = concat_performance_df.plot(kind='bar', figsize=(12, 6), 
+                                    color=['coral', 'lightskyblue'])
+    ax.figure.subplots_adjust(bottom=0.22)
+    if isinstance(random_seed, int):
+        random_seed_title = f'Random Seed {random_seed}'
+    else:
+        random_seed_title = f'Average Scores of Multiple Iterations'
+    plt.title(f'Model Performance Metrics for {random_seed_title}')
+    plt.xlabel('Performance Metric')
+    plt.ylabel('Scores')
+    plt.xticks(ha='right', rotation=45)
+    plt.legend(title='Models', loc='upper left', bbox_to_anchor=(1.0, 1.0))
+
+    # Add labels on top of each bar
+    for i in ax.patches:
+        ax.text(i.get_x() + i.get_width() / 2, i.get_height() + 0.01, round(i.get_height(), 2), ha='center')
+
+    # Save figure
+    figpath = plotdir + '/performance_metrics/comparisons/'
+
+    if not os.path.exists(figpath):
+        os.makedirs(figpath)
+        
+    if isinstance(random_seed, int):
+        figname = f'{model1_name}_vs_{model2_name}_model_performance_metrics_for_seed{random_seed}.png'
+    else:
+        figname = f'{model1_name}_vs_{model2_name}_model_performance_metrics_{random_seed}.png'
+
+    plt.savefig(figpath + figname)
+    plt.close()
+
 def create_bar_chart_1980_vs_1911_performance_metrics(
     performance_df_1980, performance_df_1911, random_seed
 ):
@@ -214,7 +285,7 @@ def create_bar_chart_1980_vs_1911_performance_metrics(
         ax.text(i.get_x() + i.get_width() / 2, i.get_height() + 0.01, round(i.get_height(), 2), ha='center')
 
     # Save figure
-    figpath = plotdir + '/performance_metrics/1980_vs_1991_comparison/'
+    figpath = plotdir + '/performance_metrics/1980_vs_1911_comparison/'
 
     if not os.path.exists(figpath):
         os.makedirs(figpath)
@@ -480,8 +551,8 @@ def main():
         predictors = predictors_dict[model]
         performance_df_from_n_seeds, mean_performance_df = combine_all_iterative_functions(training_data, predictors, 'Drought', 0.3, model)
 
-        # mean_performance_df_dict[model] = mean_performance_df
-    
+        mean_performance_df_dict[model] = mean_performance_df
+    create_bar_chart_to_compare_two_performance_metrics(mean_performance_df_dict['1911'], mean_performance_df_dict['1911_simp'], '1911', '1911_simp', 'average_score')
     # create_bar_chart_1980_vs_1911_vs_new_performance_metrics(
     #     mean_performance_df_dict['1980'], mean_performance_df_dict['1911'], mean_performance_df_dict['new'], 'average_score'
     # )
