@@ -9,18 +9,19 @@ import processing_functions
 precip_filepath = processing_functions.my_data_dir + 'RF_project/Precipitation/AGCD/'
 ET_filepath = processing_functions.my_data_dir + 'RF_project/ET_products/v3_6/'
 SM_filepath = processing_functions.my_data_dir + 'RF_project/Soil_Moisture/v3_8/'
+Runoff_filepath = processing_functions.my_data_dir + 'RF_project/Runoff/AWRA/'
 
 
 MODEL_TYPES = [
-    'full', 
-    'long_ts',
+    '1980', 
+    '1911',
     # 'test'
 ]
 
 TIME_PERIODS = {
     'test': [1981, 1983],
-    'full': [1980, 2022], 
-    'long_ts': [1911, 2022]
+    '1980': [1980, 2022], 
+    '1911': [1911, 2022]
 }
 
 
@@ -43,12 +44,15 @@ COORDS = {
 
 
 VARS = {
-    1981: ['Precipitation', 'Runoff', 'ENSO_index', 'PET'],
-    1980: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
-           'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMsurf', 'SMroot'],
+    # 1981: ['Precipitation', 'Runoff', 'ENSO_index', 'PET'],
+    1980: ['Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 'SAM_index', 
+           'Mean_12-Month_ET', 'Mean_12-Month_PET', 'Mean_12-Month_SMsurf', 'Mean_12-Month_SMroot'],
+    # 1980: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
+    #        'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMsurf', 'SMroot'],
     
-    1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
-           'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index'],
+    # 1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
+    #        'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index'],
+    1911: ['Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index']
 }
 
 
@@ -58,7 +62,12 @@ FILES = {
     'Acc_6-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_6monthly_1900_2021.nc',
     'Acc_12-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_12monthly_1900_2021.nc',
     'Acc_24-Month_Precipitation': precip_filepath + 'AGCD_v1_precip_total_r005_24monthly_1900_2021.nc',
-    'Runoff': processing_functions.my_data_dir + 'RF_project/Runoff/AWRA/AWRAv7_Runoff_month_1911_2023.nc', 
+    'Runoff': processing_functions.my_data_dir + 'RF_project/Runoff/AWRA/AWRAv7_Runoff_month_1911_2023.nc',
+    'Mean_12-Month_Runoff': Runoff_filepath + f'AWRAv7_Runoff_12_month_mean_1911_2023.nc',
+    'Mean_12-Month_ET': ET_filepath + f'ET/ET_1980-2021_GLEAM_v3.6a_12_month_mean_MO_Australia_0.05grid.nc',
+    'Mean_12-Month_PET': ET_filepath + f'PET/PET_1980-2021_GLEAM_v3.6a_12_month_mean_MO_Australia_0.05grid.nc',
+    'Mean_12-Month_SMsurf': SM_filepath + f'SMroot/SMroot_1980-2022_GLEAM_v3.8a_12_month_mean_MO_Australia_0.05grid.nc',
+    'Mean_12-Month_SMroot': SM_filepath + f'SMsurf/SMsurf_1980-2022_GLEAM_v3.8a_12_month_mean_MO_Australia_0.05grid.nc',
     'ENSO_index': processing_functions.my_data_dir + 'RF_project/ENSO/ENSO_BEST_index_sorted.csv',
     'IOD_index': processing_functions.my_data_dir + 'RF_project/IOD/IOD_DMI_index_sorted.csv',
     'SAM_index': processing_functions.my_data_dir + 'RF_project/SAM/SAM_AAO_index_sorted.csv',
@@ -172,7 +181,7 @@ def create_list_of_predictors_ds(start_year, end_year, area):
         elif file[-2:] == 'nc':
             predictor_ds = xr.open_dataset(file)
         else:
-            raise ValueError(f'File type of {new_predictor_name} not supported. '
+            raise ValueError(f'File type of {variable} not supported. '
                              f'Expected .nc or .csv file got file: {file} instead')
         
         predictor_ds = constrain_data(predictor_ds, start_year, end_year, area)
@@ -262,8 +271,8 @@ def main():
             if not os.path.exists(filepath):
                 os.makedirs(filepath)
                 
-            filename_nc = f'predictors_dataset_{start_year}-{end_year}_{area}.nc'
-            filename_csv = f'predictors_dataframe_{start_year}-{end_year}_{area}.csv'
+            filename_nc = f'new_predictors_dataset_{start_year}-{end_year}_{area}.nc'
+            filename_csv = f'new_predictors_dataframe_{start_year}-{end_year}_{area}.csv'
             
             predictors_ds.to_netcdf(filepath + filename_nc)
             predictors_df.to_csv(filepath + filename_csv)

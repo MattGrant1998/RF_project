@@ -95,3 +95,4 @@ def add_predictor_to_predictors_dataframe(predictors_df, new_predictor_name, are
     merged_df = pd.merge(predictors_df, new_predictor_df, on='Year_Month', how='inner')
     
     return merged_df
+    

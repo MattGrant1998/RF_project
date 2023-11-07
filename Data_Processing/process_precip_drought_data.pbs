@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -P w97
+#PBS -q normal
+#PBS -l ncpus=8
+#PBS -l mem=30Gb
+#PBS -l walltime=00:10:00
+#PBS -l jobfs=1gb
+#PBS -l wd
+#PBS -l storage=gdata/hh5+gdata/w97+gdata/ua8
+#PBS -j oe
+#PBS -M matt.grant@unsw.edu.au
+ 
+module use /g/data/hh5/public/modules
+module load conda/analysis3
+ 
+#python3 
+python3 /home/561/mg5624/RF_project/Data_Processing/process_precip_drought_data.py

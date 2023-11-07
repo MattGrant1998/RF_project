@@ -22,12 +22,15 @@ def main():
     precip_drought_path = '/g/data/w97/amu561/Steven_CABLE_runs/drought_metrics_AGCD/3-month/drought_metrics_AGCD_precip_1900_2021_baseline_1970_2005_scale_3.nc'
     precip_drought_ds = xr.open_dataset(precip_drought_path)
     precip_drought = precip_drought_ds.timing
+    print('Loaded drought metric')
 
     precip = xr.open_dataarray('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
     precip_drought_correct_time = fix_time_coord(precip_drought, precip)
+    print('corrected time coord of drought data')
 
-    precip_drought.rename('precip_based_drought')
-
+    renamed_precip_drought = precip_drought_correct_time.rename('Drought')
+    print('renamed drought data')
+    print(renamed_precip_drought)
     filepath_out = '/g/data/w97/mg5624/RF_project/drought_metric/precip_percentile/'
 
     if not os.path.exists(filepath_out):
@@ -35,8 +38,8 @@ def main():
 
     filename = 'AGCD_precip_percentile_drought_metric_monthly_1900-2021.nc'
 
-    precip_drought.to_netcdf(filepath_out + filename)
-
+    renamed_precip_drought.to_netcdf(filepath_out + filename)
+    print('done - woo!')
 
 if __name__ == "__main__":
     main()

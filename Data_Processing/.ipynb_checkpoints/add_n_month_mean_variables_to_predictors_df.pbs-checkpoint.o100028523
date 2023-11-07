@@ -1,0 +1,39 @@
+[<xarray.Dataset>
+Dimensions:              (lat: 691, lon: 861, time: 1353)
+Coordinates:
+  * lat                  (lat) float32 -44.5 -44.45 -44.4 ... -10.1 -10.05 -10.0
+  * lon                  (lon) float32 112.0 112.1 112.1 ... 154.9 154.9 155.0
+  * time                 (time) datetime64[ns] 1911-01-01 ... 2023-09-01
+Data variables:
+    Mean_3-Month_Runoff  (time, lat, lon) float32 ..., <xarray.Dataset>
+Dimensions:               (lat: 691, lon: 861, time: 1353)
+Coordinates:
+  * lat                   (lat) float32 -44.5 -44.45 -44.4 ... -10.05 -10.0
+  * lon                   (lon) float32 112.0 112.1 112.1 ... 154.9 154.9 155.0
+  * time                  (time) datetime64[ns] 1911-01-01 ... 2023-09-01
+Data variables:
+    Mean_24-Month_Runoff  (time, lat, lon) float32 ...]
+ds list made
+ds merged
+ds saved
+ds to df complete
+df saved:  Index(['Longitude', 'Latitude', 'time', 'Precipitation', 'Year', 'Month',
+       'Year_Month', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation',
+       'Acc_12-Month_Precipitation', 'Acc_24-Month_Precipitation', 'Runoff',
+       'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMroot', 'SMsurf',
+       'Sin_month', 'Cos_month'],
+      dtype='object')
+job done :)
+
+======================================================================================
+                  Resource Usage on 2023-11-06 16:36:49:
+   Job Id:             100028523.gadi-pbs
+   Project:            w97
+   Exit Status:        0
+   Service Units:      17.11
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:20:17        
+   Memory Requested:   100.0GB               Memory Used: 40.04GB         
+   Walltime requested: 00:30:00            Walltime Used: 00:20:32        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================

@@ -13,9 +13,8 @@ def load_and_constrain_precip_drought(start_year, end_year):
         start_year (int): start year to constrain data to
         end_year (int): end year to constrain data to
     """
-    path = '/g/data/w97/amu561/Steven_CABLE_runs/drought_metrics_AGCD/3-month/drought_metrics_AGCD_precip_1900_2021_baseline_1970_2005_scale_3.nc'
-    precip_drought_ds = xr.open_dataset(path)
-    precip_drought = precip_drought_ds.timing
+    path = f'{datadir}/drought_metric/precip_percentile/AGCD_precip_percentile_drought_metric_monthly_1900-2021.nc'
+    precip_drought = xr.open_dataarray(path)
 
     const_precip_drought = constrain_data(precip_drought, start_year, end_year, 'SE_australia')
 
@@ -33,13 +32,6 @@ def add_precip_drought_to_predictors_ds(predictors_ds, precip_drought):
     Returns:
         predictors_precip_drought_ds (xr.Dataset): dataset with predictors data plus precip based drought events data
     """
-    if 'Year_Month' not in precip_drought.coords.keys():
-            precip_drought = add_year_month_coord_to_dataarray(precip_drought)
-            
-    print('Predictors ds is: \n', predictors_ds)
-    print('precip_dorught ds is: \n', precip_drought)
-    print('Year_month coord for predictor is: \n', predictors_ds['Year_Month'])
-    print('year_month coord for precip_drought is: \n', precip_drought['Year_Month'])
     predictors_precip_drought_ds = xr.merge([predictors_ds, precip_drought], join='left')
 
     return predictors_precip_drought_ds

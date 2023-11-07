@@ -1,0 +1,23 @@
+
+------------------------------------------------------------------------
+Job 100102308 has exceeded memory allocation on node gadi-cpu-clx-0681.gadi.nci.org.au
+Process "bash", pid 229425, rss 3432448, vmem 23883776
+Process "100102308.gadi-", pid 229497, rss 2985984, vmem 228007936
+Process "python3", pid 229819, rss 149992312832, vmem 152666566656
+------------------------------------------------------------------------
+For more information visit https://opus.nci.org.au/x/SwGRAQ
+------------------------------------------------------------------------
+/local/spool/pbs/mom_priv/jobs/100102308.gadi-pbs.SC: line 17: 229819 Killed                  python3 /home/561/mg5624/RF_project/Data_Processing/add_n_month_mean_variables_to_predictors_df.py
+
+======================================================================================
+                  Resource Usage on 2023-11-07 10:15:40:
+   Job Id:             100102308.gadi-pbs
+   Project:            w97
+   Exit Status:        137 (Linux Signal 9 SIGKILL Kill, unblockable)
+   Service Units:      5.78
+   NCPUs Requested:    8                      NCPUs Used: 8               
+                                           CPU Time Used: 00:04:31        
+   Memory Requested:   140.0GB               Memory Used: 140.0GB         
+   Walltime requested: 00:30:00            Walltime Used: 00:04:57        
+   JobFS requested:    1.0GB                  JobFS used: 0B              
+======================================================================================

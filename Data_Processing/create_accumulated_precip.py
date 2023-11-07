@@ -3,6 +3,7 @@ import pandas as pd
 import processing_functions
 import os
 
+
 # Load AGCD precip data
 precip_ds = xr.open_dataset(
     '/g/data/w97/amu561/AGCD_drought_metrics/AGCD_1900_2021/AGCD_v1_precip_total_r005_monthly_1900_2021.nc'

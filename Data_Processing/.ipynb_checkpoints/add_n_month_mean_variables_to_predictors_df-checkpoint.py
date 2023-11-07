@@ -10,16 +10,15 @@ SM_path = datadir + 'Soil_Moisture/v3_8/'
 Runoff_path = datadir + 'Runoff/AWRA/'
 
 VARS = ['Runoff', 
-        'ET', 
-        'PET',
-        'SMsurf', 
-        'SMroot'
+        # 'ET', 
+        # 'PET',
+        # 'SMsurf', 
+        # 'SMroot'
        ]
-       
-# N_MONTHS = [3,
-#             6,
-#             12,
-#             24]
+N_MONTHS = [3, 
+            # 6, 
+            # 12, 
+            24]
 
 
 def var_filepath(var_name, n_months):
@@ -55,9 +54,9 @@ def add_new_var_to_predictors_ds(predictors_ds, var_name, n_months):
     new_var_constr = constrain_data(new_var, 1980, 2022, 'SE_australia')
 
     if 'Year_Month' not in new_var.coords.keys():
-            new_var_constr = add_year_month_coord_to_dataarray(new_var_constr)
+            new_var = add_year_month_coord_to_dataarray(new_var)
         
-    predictors_ds_with_new_var = xr.merge([predictors_ds, new_var_constr], join='outer')
+    predictors_ds_with_new_var = xr.merge([predictors_ds, new_var], join='outer')
 
     return predictors_ds_with_new_var
 
@@ -93,10 +92,10 @@ def save_predictors_ds_and_df(predictors_ds):
     predictors_ds.to_netcdf(filepath + 'predictors_dataset_1980-2022_SE_australia1.nc')
     print('ds saved')
     
-    # predictors_df = convert_dataset_to_dataframe(predictors_ds)
-    # print('ds to df complete')
-    # predictors_df.to_csv(filepath + 'predictors_dataframe_1980-2022_SE_australia1.csv')
-    # print('df saved: ', predictors_df.columns)
+    predictors_df = convert_dataset_to_dataframe(predictors_ds)
+    print('ds to df complete')
+    predictors_df.to_csv(filepath + 'predictors_dataframe_1980-2022_SE_australia1.csv')
+    print('df saved: ', predictors_df.columns)
 
 
 # def save_ds_as_df(ds):
@@ -118,7 +117,7 @@ def main():
     print('ds list made')
     new_predictors_ds = xr.merge(var_datasets)
     print('ds merged')
-    save_predictors_ds_and_df(new_predictors_ds)
+    save_predictors_ds_and_df(predictors_ds)
     print('job done :)')
     
     
