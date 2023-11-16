@@ -11,6 +11,7 @@ import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, balanced_accuracy_score, confusion_matrix
+from sklearn.inspection import permutation_importance
 
 plotdir = '/g/data/w97/mg5624/plots/RF_project/model_analytics/'
 datadir = '/g/data/w97/mg5624/RF_project/'
@@ -28,9 +29,8 @@ predictors_new = [
 ]
 
 predictors_new_simplified = [
-    'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 
-    'SAM_index', 'Mean_12-Month_ET', 'Mean_12-Month_PET', 'Mean_12-Month_SMsurf', 'Mean_12-Month_SMroot', 
-    'Sin_month', 'Cos_month'
+    'ENSO_index', 'Mean_12-Month_ET', 'Mean_12-Month_PET', 'Acc_12-Month_Precipitation', 'Mean_12-Month_SMsurf', 
+    'SAM_index', 'Mean_12-Month_SMroot',  'Mean_12-Month_Runoff', 'IOD_index', 'Cos_month', 'Sin_month'
 ]
 
 # predictors with all variables
@@ -51,7 +51,7 @@ predictors_1911 = [
 
 
 predictors_1911_simp = [
-    'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 'Sin_month', 'Cos_month'
+    'ENSO_index', 'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff',  'IOD_index', 'Cos_month', 'Sin_month'
 ]
 
 
@@ -97,10 +97,10 @@ target = 'Drought'
 
 model_types = [
     # '1980',
-    '1911',
+    # '1911',
     '1911_simp',
     # 'new',
-    # 'new_simp',
+    'new_simp',
 ]
 
 model_title = {
@@ -108,8 +108,8 @@ model_title = {
         "1911": "1911",
         "1911_simp": "1911 (simplified)",
         "new": "New",
-        "new_simp": "New (simplified)",
-    }
+        "new_simp": "1980",
+}
 
 predictors_dict = {
     '1980': predictors_1980,
@@ -248,6 +248,7 @@ def create_bar_chart_to_compare_two_performance_metrics(
     plt.savefig(figpath + figname)
     plt.close()
 
+
 def create_bar_chart_1980_vs_1911_performance_metrics(
     performance_df_1980, performance_df_1911, random_seed
 ):
@@ -265,25 +266,27 @@ def create_bar_chart_1980_vs_1911_performance_metrics(
     performance_frames = [performance_df_1980, performance_df_1911]
     concat_performance_df = pd.concat(performance_frames)
     
-    concat_performance_df.index = ['1980', '1911']
+    concat_performance_df.index = ['All Predictors', '1911 Predictors']
     concat_performance_df = concat_performance_df.T
     
-    ax = concat_performance_df.plot(kind='bar', figsize=(12, 6), 
-                                    color=['coral', 'lightskyblue'])
-    ax.figure.subplots_adjust(bottom=0.22)
+    ax = concat_performance_df.plot(kind='bar', figsize=(18, 9), 
+                                    color=['coral', 'lightskyblue'], width=0.8)
+    # ax.figure.subplots_adjust(bottom=0.22)
     if isinstance(random_seed, int):
         random_seed_title = f'Random Seed {random_seed}'
     else:
         random_seed_title = f'Average Scores of Multiple Iterations'
-    plt.title(f'Model Performance Metrics for {random_seed_title}')
-    plt.xlabel('Performance Metric')
-    plt.ylabel('Scores')
-    plt.xticks(ha='right', rotation=45)
-    plt.legend(title='Models', loc='upper left', bbox_to_anchor=(1.0, 1.0))
+    # plt.title(f'Performance Metrics', fontsize=44)
+    # plt.xlabel('Performance Metric', fontsize=32)
+    plt.ylabel('Scores', fontsize=32)
+    plt.xticks(ha='right', rotation=30, fontsize=28)
+    plt.yticks(fontsize=28)
+    plt.legend(loc='upper left', bbox_to_anchor=(1.0, 1.0), fontsize=24)
+    plt.subplots_adjust(left=0.1, right=0.75, bottom=0.30, top=0.93)
 
     # Add labels on top of each bar
     for i in ax.patches:
-        ax.text(i.get_x() + i.get_width() / 2, i.get_height() + 0.01, round(i.get_height(), 2), ha='center')
+        ax.text(i.get_x() + i.get_width() / 2, i.get_height() + 0.01, round(i.get_height(), 2), ha='center', fontsize=21)
 
     # Save figure
     figpath = plotdir + '/performance_metrics/1980_vs_1911_comparison/'
@@ -298,6 +301,7 @@ def create_bar_chart_1980_vs_1911_performance_metrics(
 
     plt.savefig(figpath + figname)
     plt.close()
+    print('Performance Metric done')
 
 
 def create_bar_chart_1980_vs_1911_vs_new_performance_metrics(
@@ -351,7 +355,7 @@ def create_bar_chart_1980_vs_1911_vs_new_performance_metrics(
     plt.close()
     
 
-def create_variable_importance_barchart(variable_importance, X, model_type, random_seed):
+def create_variable_importance_barchart(variable_importance, X, model_type, random_seed, var_import_type='MDI'):
     """
     Plots barchart indicating each variables importances in the model.
     
@@ -360,39 +364,70 @@ def create_variable_importance_barchart(variable_importance, X, model_type, rand
         X: predictor variables
         model_type (str): either "1980" or "1911"
         random_seed (int): random state of the RF model ('average_score' if average of many random seeds)
+        var_import_type (str): the type of variable impoartance to compute ('standard' or 'premutation_all' or 'permutation_unseen')
     """
     # Create a bar graph of variable importances
-    ax = plt.figure(figsize=(12, 6))
+    ax = plt.figure(figsize=(24, 18))
     ax.figure.subplots_adjust(bottom=0.3)
     x_labels = [variable_to_label[var_name] for var_name in X.columns]
-    plt.bar(x_labels, variable_importance)
-    plt.xticks(ha='right', rotation=45)
-    plt.xlabel('Predictors')
-    plt.ylabel('Importance')
+
+    if model_type == '1980' or model_type == 'new_simp':
+        color = 'coral'
+        name = 'All Predictors'
+    elif model_type == '1911' or model_type == '1911_simp':
+        color = 'lightskyblue'
+        name = '1911 Predictors'
+    else:
+        color = 'blue'
+        name = ''
+
+    plt.bar(x_labels, variable_importance, color=color)
+    plt.xticks(ha='right', rotation=35, fontsize=32)
+    plt.yticks(fontsize=32)
+    # plt.xlabel('Predictors')
+    plt.ylabel('Importance', fontsize=34)
+    plt.subplots_adjust(left=0.1, right=0.95, bottom=0.35, top=0.9)
+
     if isinstance(random_seed, int):
         random_seed_title = f'Random Seed {random_seed}'
-        figname = f'variable_importance_{model_type}_var_model_seed{random_seed}.png'
+        figname = f'{var_import_type}_variable_importance_{model_type}_var_model_seed{random_seed}.png'
     else:
         random_seed_title = f'the Average of Multiple Iterations'
-        figname = f'variable_importance_{model_type}_{random_seed}.png'
+        figname = f'{var_import_type}_variable_importance_{model_type}_{random_seed}.png'
+    
+    var_import_type_title = {
+        'MDI': 'MDI',
+        'permutation_all': 'Permutation (all)',
+        'permutation_unseen': 'Permutation (unseen)',
+    }
+
+    plt.title(name, fontsize=44)
+    # plt.title(f'{var_import_type_title[var_import_type]} Variable Importance in the {model_type} Model for {random_seed_title}')
+    # plt.title(f'Variable Importance of the {model_type} Model', fontsize=44)
+
+    if model_type[-14:-7] == 'drought':
+        model_type_path = model_type[:-7]
+    else:
+        model_type_path = model_type
         
-    plt.title(f'Variable Importance in the {model_type} Model for {random_seed_title}')
-    figpath = plotdir + f'/variable_importance/{model_type}/'
+    figpath = plotdir + f'/variable_importance/{var_import_type}/{model_type_path}/'
 
     if not os.path.exists(figpath):
         os.makedirs(figpath)
     
     plt.savefig(figpath + figname)
     plt.close()
+    print('Variable Importance done')
 
 
-def performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, test_size, n_iterations=5):
+def performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, test_size, var_import_type='MDI', n_iterations=100):
     """
     Trains the Random Forest with different seeds to assess stability and generalisability of the model.
     Args:
     X: predictor variables data
     y: target variables data
     test_size (float): proportion of data to be held back for testing
+    var_import_type (str): the type of variable impoartance to compute ('standard' or 'premutation_all' or 'permutation_unseen')
     n_iterations (int): number of iterations of model (default=100)
     """
     seeds = np.arange(n_iterations)
@@ -418,8 +453,18 @@ def performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, tes
         clf.fit(X_train, y_train)
 
         # Calculate variable importance
-        variable_importance[:, i] = clf.feature_importances_
-        
+        if var_import_type == 'MDI':
+            variable_importance[:, i] = clf.feature_importances_
+        elif var_import_type == 'permutation_all':
+            perm_variable_importance_dict = permutation_importance(clf, X, y, n_repeats=50, random_state=42, n_jobs=-1)
+            variable_importance[:, i] = perm_variable_importance_dict['importances_mean']
+        elif var_import_type == 'permutation_unseen':
+            perm_variable_importance_dict = permutation_importance(clf, X_test, y_test, n_repeats=50, random_state=42, n_jobs=-1)
+            variable_importance[:, i] = perm_variable_importance_dict['importances_mean']
+        # else:
+        #     raise ValueError(f'var_import_type {var_import_type} unknown. Please input valid 
+        #                      var_import_type: standard, permutation_all, permutation_unseen')
+
         # Predict on test data
         y_pred = clf.predict(X_test)
     
@@ -432,6 +477,7 @@ def performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, tes
         confusion_matrix = sklearn.metrics.confusion_matrix(y_test, y_pred, normalize='all')
         false_alarm_scores[i] = confusion_matrix[0, 1]
         
+
     # Create a DataFrame to store the performance metrics for each iteration
     performance_df = pd.DataFrame({
         'Accuracy': accuracy_scores,
@@ -441,7 +487,6 @@ def performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, tes
         'Balanced Accuracy': balanced_accuracy_scores,
         'False Alarm': false_alarm_scores
     })
-
     variable_importance_df = pd.DataFrame(variable_importance.T, columns=X.columns)
     
     return performance_df, variable_importance_df
@@ -488,12 +533,13 @@ def create_performance_metrics_boxplot(performance_df, model_type):
     plt.close()
     
 
-def create_variable_importance_boxplot(variable_importance_df, model_type):
+def create_variable_importance_boxplot(variable_importance_df, model_type, var_import_type='MDI'):
     """
     Plots a boxplot of the variable importance across n_iterated models.
     Args:
         variable_importance_df (pd.DataFrame): dataframe of the variable importance from each iteration of the RF model
         model_type (str): describing the type of RF model either "1980", or "1911"
+        var_import_type (str): the type of variable impoartance to compute ('standard' or 'premutation_all' or 'permutation_unseen')
     """       
     # Draw a  box and whisker plot to display the results of each performance metric across 30 iterations
     plt.figure(figsize=(12, 6))
@@ -501,21 +547,31 @@ def create_variable_importance_boxplot(variable_importance_df, model_type):
     ax.figure.subplots_adjust(bottom=0.3)
     plt.ylabel('Score')
     plt.xticks(ha='right', rotation=45)
-    plt.title(f'Box and Whisker Plot for Variable Importance of the {model_type} Model Across 100 Iterations')
+    var_import_type_title = {
+        'MDI': 'MDI',
+        'permutation_all': 'Permutation (all)',
+        'permutation_unseen': 'Permutation (unseen)',
+    }
+    plt.title(f'Box and Whisker Plot for {var_import_type_title[var_import_type]} Variable Importance of the {model_type} Model Across 100 Iterations')
 
     # Save plot
-    figpath = plotdir + f'/variable_importance/{model_type}/'
+    if model_type[-14:-7] == 'drought':
+        model_type_path = model_type[:-7]
+    else:
+        model_type_path = model_type
+
+    figpath = plotdir + f'/variable_importance/{var_import_type}/{model_type_path}/'
 
     if not os.path.exists(figpath):
         os.makedirs(figpath)
     
-    figname = f'variable_importance_boxplot_{model_type}_var_model.png'
+    figname = f'{var_import_type}_variable_importance_boxplot_{model_type}_var_model.png'
     plt.savefig(figpath + figname)
     
     plt.close()
 
 
-def combine_all_iterative_functions(data, predictors, target, test_size, model_type, n_iterations=100):
+def combine_all_iterative_functions(data, predictors, target, test_size, model_type, var_import_type='MDI', n_iterations=100):
     """
     Trains n_iterations RF models with different random states and creates plots of mean performance metrics and
     variable importance. Also creates boxplots to show the spread of the performance metrics over the iterations.
@@ -526,41 +582,70 @@ def combine_all_iterative_functions(data, predictors, target, test_size, model_t
         target (str): target variable for the model
         test_size (float): proportion of training data to hold back for testing
         model_type (str): describing the type of RF model either "1980", "1911", or "new"
+        var_import_type (str): the type of variable impoartance to compute ('standard' or 'premutation_all' or 'permutation_unseen')
         n_iterations (int): number of RF models to train (default=100)
     """
     X = data[predictors]
     y = data[target]
-
-    performance_df, variable_importance_df = performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, test_size, n_iterations)
+    performance_df, variable_importance_df = performance_and_variable_importance_from_n_iterated_RF_model_seeds(X, y, test_size, var_import_type, n_iterations)
     mean_performance_df, mean_variable_importance_df = find_mean_performance_metrics_and_var_importance(performance_df, variable_importance_df)
     mean_variable_importance = mean_variable_importance_df.values[0]
-    print(mean_variable_importance_df, mean_variable_importance)
-    
+
     create_performance_metrics_boxplot(performance_df, model_type)
-    # create_variable_importance_boxplot(variable_importance_df, model_type)
+    # create_variable_importance_boxplot(variable_importance_df, model_type, var_import_type)
     
     create_performance_metric_bar_chart(mean_performance_df, 'average_score', model_type)
-    create_variable_importance_barchart(mean_variable_importance, X, model_type, 'average_score')
+    create_variable_importance_barchart(mean_variable_importance, X, model_type, 'average_score', var_import_type)
 
     return performance_df, mean_performance_df
 
 
 def main():
     mean_performance_df_dict = {}
+    # print('Running other variable importance types')
+    VAR_IMPORTS = [
+        'MDI',
+        # 'permutation_all',
+        # 'permutation_unseen',
+    ]
+
     for model in model_types:
         print('Model: ', model)
         predictors = predictors_dict[model]
-        performance_df_from_n_seeds, mean_performance_df = combine_all_iterative_functions(training_data, predictors, 'Drought', 0.3, model)
+        for var_import in VAR_IMPORTS:
+            performance_df_from_n_seeds, mean_performance_df = combine_all_iterative_functions(
+                training_data, predictors, 'Drought', 0.3, model, var_import_type=var_import, n_iterations=100
+                )
 
         mean_performance_df_dict[model] = mean_performance_df
-    create_bar_chart_to_compare_two_performance_metrics(mean_performance_df_dict['1911'], mean_performance_df_dict['1911_simp'], '1911', '1911_simp', 'average_score')
+    # create_bar_chart_to_compare_two_performance_metrics(mean_performance_df_dict['1911_simp'], mean_performance_df_dict['new_simp'], '1911_simp', 'new_simp', 'average_score')
     # create_bar_chart_1980_vs_1911_vs_new_performance_metrics(
     #     mean_performance_df_dict['1980'], mean_performance_df_dict['1911'], mean_performance_df_dict['new'], 'average_score'
     # )
+    create_bar_chart_1980_vs_1911_performance_metrics(
+        mean_performance_df_dict['new_simp'], mean_performance_df_dict['1911_simp'], 'average_score'
+    )
+    # create_bar_chart_1980_vs_1911_performance_metrics()
+    
+    # VARS = [
+    #     'precip',
+    #     'runoff',
+    #     'soil_moisture'
+    # ]
 
-    # create_bar_chart_1980_vs_1911_performance_metrics(
-    #     mean_performance_df_dict['1980'], mean_performance_df_dict['1911'], 'average_score'
-    # )
+    # YEARS = [1980, 2014]
+    # for n in range(10):
+    #     print("Iteration: ", n)
+    #     for var in VARS:
+    #         print("Variable: ", var)
+    #         for year in YEARS:
+    #             print("Year: ", year)
+    #             test_training_data = pd.read_csv(
+    #                 f'/g/data/w97/mg5624/RF_project/training_data/test_training/{var}/{year}+_random_subsets/test_training_data_{var}_1000_points_{year}+_random_selection{n}.csv'
+    #             )
+    #             test_training_data.dropna(axis=0, inplace=True)
+    #             combine_all_iterative_functions(test_training_data, predictors_new_simplified, 'Drought', 0.3, f'{var}_drought{n}_{year}+')
+    # print('done woo!')
 
 
 if __name__ == "__main__":

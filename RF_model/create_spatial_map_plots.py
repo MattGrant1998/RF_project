@@ -14,8 +14,8 @@ datadir = '/g/data/w97/mg5624/RF_project/'
 plotdir = '/g/data/w97/mg5624/plots/RF_project/results_analysis/'
 scratch = '/scratch/w97/mg5624/plots/RF_project/results_analysis/'
 
-drought_ds_1980 = xr.open_dataset(datadir + '/drought_prediction/full_model/drought_prediction_dataset_full_model.nc')
-drought_ds_1911 = xr.open_dataset(datadir + '/drought_prediction/long_ts_model/drought_prediction_dataset_long_ts_model.nc')
+drought_ds_1980 = xr.open_dataset(datadir + '/drought_prediction/1980_model/drought_prediction_dataset_1980_model.nc')
+drought_ds_1911 = xr.open_dataset(datadir + '/drought_prediction/1911_model/drought_prediction_dataset_1911_model.nc')
 
 drought_events_1980 = drought_ds_1980.drought
 drought_events_1911 = drought_ds_1911.drought
@@ -23,13 +23,16 @@ drought_events_1911 = drought_ds_1911.drought
 drought_proba_1980 = drought_ds_1980.drought_proba
 drought_proba_1911 = drought_ds_1911.drought_proba
 
-MODELS = ['1980', '1911']
+MODELS = [
+    '1980', 
+    # '1911'
+]
 
 MEASURES = ['Probability Anomaly', 'Event']
 
 # DATA = {
-#     'Event': {'1980': drought_events_full, '1911': drought_events_long_ts},
-#     'Probability Anomaly': {'1980': anom_proba_full, '1911': anom_proba_long_ts},
+#     'Event': {'1980': drought_events_1980, '1911': drought_events_1911},
+#     'Probability Anomaly': {'1980': anom_proba_1980, '1911': anom_proba_1911},
 # }
 
 DATA_PROBA = {
@@ -52,26 +55,28 @@ TIME_PERIODS = [
 ]
 
 known_droughts = {
-    '1980': ['1982-83', 
-             'millenium', 
-             'tinderbox'
-            ],
-    '1911': ['1914-15', 
-             'WWII', 
-             '1965-68', 
-             '1982-83', 
-             'millenium', 
-             'tinderbox'
-            ],
+    '1980': [
+        # '1982-83', 
+        'millenium', 
+        # 'tinderbox'
+    ],
+    '1911': [
+        '1914-15', 
+        'WWII', 
+        '1965-68', 
+        '1982-83', 
+        'millenium', 
+        'tinderbox'
+    ],
 }
 
 known_droughts_years = {
-    '1914-15': list(range(1912, 1917)),
-    'WWII': list(range(1935, 1948)),
-    '1965-68': list(range(1963, 1970)),
-    '1982-83': list(range(1981, 1985)),
+    # '1914-15': list(range(1912, 1917)),
+    # 'WWII': list(range(1935, 1948)),
+    # '1965-68': list(range(1963, 1970)),
+    # '1982-83': list(range(1981, 1985)),
     'millenium': list(range(1998, 2011)),
-    'tinderbox': list(range(2015, 2021)),
+    # 'tinderbox': list(range(2015, 2021)),
 }
 
 METRICS = ['mean', 'max', 'min']
@@ -169,6 +174,40 @@ def create_drought_events_per_year_plots(data, start_year, end_year, model_type,
     plt.close()
 
 
+def create_indiviual_year_of_drought_proba_plot(data, year, model_type):
+    """
+    Creates a spatial plot of mean drought probability anomaly for an individual year.
+
+    Args:
+        data (xr.DataArray): dataarray of the drought probability, inclusive of the years from start_year to end_year
+        year (int or str): year to plot
+        model_type (str or int): the model that is being plotted (either '1980' or '1911')
+        metric (str): metric of the drought probability (e.g. 'mean', 'max')
+    """
+    yearly_drought_proba = data.groupby('time.year').mean('time')
+    drought_proba_const = yearly_drought_proba.sel(year=year)
+    plt.figure(figsize=(16, 12), dpi=300)
+
+    plt.title(year, fontsize=44)
+    cmap = 'BrBG_r'
+    vmax = 0.5
+    vmin=-0.5
+    extend = 'both'
+    figpath = scratch + f'/spatial_maps/drought_proba/{model_type}_model/poster_plots/'
+    figname = f'anom_{model_type}_mean_drought_proba_for_{year}.png'
+      
+    ax = plt.subplot(projection=ccrs.PlateCarree())
+    cbar_sets = {'fraction': 0.04, 'pad': 0.04, 'label': 'Probability of Drought', 'extend': extend}
+    drought_proba_const.plot.pcolormesh(cmap=cmap, vmin=vmin, vmax=vmax, cbar_kwargs=cbar_sets)
+    ax.coastlines(resolution='50m')
+
+    if not os.path.exists(figpath):
+        os.makedirs(figpath)
+    
+    plt.savefig(figpath + figname)
+    plt.close()
+
+
 def create_yearly_drought_proba_plots(data, start_year, end_year, model_type, metric, anom=False):
     """
     Creates figure of spatial maps of the average droughts probability for each year from start_year to end_year (inclusive).
@@ -244,7 +283,7 @@ def create_monthly_drought_proba_or_event_maps_for_specified_year(data, year, mo
         drought_measure (str): which measure of drought to plot: 'Probability Anomaly' or 'Events'
         known_drought (str): name of the known drought comapring to (if not comparing to known drought, put 'None')
     """
-    year_data = data.sel(time=slice(str(year - 1) + '-12', str(year) + '-11'))
+    year_data = data.sel(time=slice(str(year) + '-01', str(year) + '-12'))
     num_rows = 4
     num_cols = 3
 
@@ -268,7 +307,7 @@ def create_monthly_drought_proba_or_event_maps_for_specified_year(data, year, mo
     cmap = plot_dict[drought_measure]['cmap']
     extend = plot_dict[drought_measure]['extend']
     
-    months = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov']
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     plt.suptitle(f'Drought {drought_measure} for the {model_type} Model', fontsize=25)
     for i in range(num_rows):
         for j in range(num_cols):
@@ -318,14 +357,17 @@ def main():
     #         create_yearly_drought_proba_plots(DATA_PROBA[model], start_year, end_year, model, 'mean')
     #         anom_drought_proba = create_anomaly_from_mean_proba(DATA_PROBA[model])
     #         create_yearly_drought_proba_plots(anom_drought_proba, start_year, end_year, model, 'mean', anom=True)
-
+    
     for model in MODELS:
         for drought in known_droughts[model]:
             for year in known_droughts_years[drought]:
-                create_monthly_drought_proba_or_event_maps_for_specified_year(DATA_EVENT[model], year, model, 'Event')
+                
+                # create_monthly_drought_proba_or_event_maps_for_specified_year(DATA_EVENT[model], year, model, 'Event')
 
                 anom_drought_proba = create_anomaly_from_mean_proba(DATA_PROBA[model])
                 create_monthly_drought_proba_or_event_maps_for_specified_year(anom_drought_proba, year, model, 'Probability Anomaly')
+                # create_indiviual_year_of_drought_proba_plot(anom_drought_proba, year, model)
+                # create_monthly_drought_proba_or_event_maps_for_specified_year()
 
 
 if __name__ == "__main__":

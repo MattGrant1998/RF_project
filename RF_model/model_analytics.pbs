@@ -2,13 +2,14 @@
 #PBS -P w97
 #PBS -q normal
 #PBS -l ncpus=8
-#PBS -l mem=30Gb
-#PBS -l walltime=00:45:00
+#PBS -l mem=70Gb
+#PBS -l walltime=01:45:00
 #PBS -l jobfs=1gb
 #PBS -l wd
 #PBS -l storage=gdata/hh5+gdata/w97+gdata/ua8
-#PBS -j oe
 #PBS -M matt.grant@unsw.edu.au
+#PBS -m abe
+#PBS -N creating_new_simp_vs_1911_simp_perf_metrics
  
 module use /g/data/hh5/public/modules
 module load conda/analysis3

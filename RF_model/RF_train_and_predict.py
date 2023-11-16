@@ -30,8 +30,8 @@ datadir = '/g/data/w97/mg5624/RF_project/'
 
 
 MODEL_TYPES = [
-    'full',
-    'long_ts',
+    '1980',
+    '1911',
     # 'test',
 ]
 
@@ -42,18 +42,24 @@ AREAS = [
 
 PREDICTORS = {
     'test': ['Precipitation', 'Runoff', 'ENSO_index', 'PET'],
-    'full': ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
-             'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index', 'SAM_index', 'ET', 'PET', 'SMsurf', 
-             'SMroot', 'Sin_month', 'Cos_month'],
-    'long_ts': ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
-                'Acc_24-Month_Precipitation', 'Acc_12-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index', 
-                'Sin_month', 'Cos_month'],
+
+    '1980': [
+        'Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 
+        'SAM_index', 'Mean_12-Month_ET', 'Mean_12-Month_PET', 'Mean_12-Month_SMsurf', 'Mean_12-Month_SMroot', 
+        'Sin_month', 'Cos_month'
+    ],
+
+    '1911': [
+        'Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 
+        'Acc_12-Month_Precipitation', 'Acc_24-Month_Precipitation', 
+        'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index', 'Sin_month', 'Cos_month'
+    ],   
 }
 
 TIME_PERIODS = {
     'test': [1981, 1983],
-    'full': [1980, 2022], 
-    'long_ts': [1911, 2022]
+    '1980': [1980, 2022], 
+    '1911': [1911, 2022]
 }
 
 
@@ -88,7 +94,7 @@ def predict_droughts(RF_model, predictors_df, predictors, model_type):
         RF_model (sklearn.RandomForestClassifier): the trained RF model
         predictors_df (pd.Dataframe): data of all the precitors used to train the RF over the desired area and timeframe
         predictors (list): list of all the predictors used to train the RF model
-        model_type (str): the type of model we are training (either 'full' or 'long_ts')
+        model_type (str): the type of model we are training (either '1980' or '1911')
 
     Returns:
         drought_prediction_ds (xr.Dataset): data of 'Drought / No Drought' and 'Drought Probability'
