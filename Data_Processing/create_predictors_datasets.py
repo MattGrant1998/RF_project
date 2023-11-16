@@ -13,7 +13,7 @@ Runoff_filepath = processing_functions.my_data_dir + 'RF_project/Runoff/AWRA/'
 
 
 MODEL_TYPES = [
-    '1980', 
+    # '1980', 
     '1911',
     # 'test'
 ]
@@ -52,7 +52,8 @@ VARS = {
     
     # 1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 'Acc_12-Month_Precipitation', 
     #        'Acc_24-Month_Precipitation', 'Runoff', 'ENSO_index', 'IOD_index'],
-    1911: ['Acc_12-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index']
+    1911: ['Precipitation', 'Acc_3-Month_Precipitation', 'Acc_6-Month_Precipitation', 
+           'Acc_12-Month_Precipitation', 'Acc_24-Month_Precipitation', 'Mean_12-Month_Runoff', 'ENSO_index', 'IOD_index']
 }
 
 

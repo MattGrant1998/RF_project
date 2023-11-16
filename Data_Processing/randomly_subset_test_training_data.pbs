@@ -3,15 +3,16 @@
 #PBS -q normal
 #PBS -l ncpus=8
 #PBS -l mem=80Gb
-#PBS -l walltime=01:30:00
+#PBS -l walltime=02:30:00
 #PBS -l jobfs=1gb
 #PBS -l wd
 #PBS -l storage=gdata/hh5+gdata/w97+gdata/ua8
-#PBS -j oe
 #PBS -M matt.grant@unsw.edu.au
+#PBS -m abe
+#PBS -N randomly_subset_test_training_data-10iteration
  
 module use /g/data/hh5/public/modules
 module load conda/analysis3
  
 #python3 
-python3 /home/561/mg5624/RF_project/Data_Processing/create_test_training_dataset.py
+python3 /home/561/mg5624/RF_project/Data_Processing/randomly_subset_test_training_data.py 10

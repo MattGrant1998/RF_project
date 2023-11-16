@@ -4,7 +4,7 @@ import pandas as pd
 from processing_functions import constrain_to_australia, regrid_to_5km_grid
 
 
-def fix_runoff_drought_time(runoff_drought_data, data_with_time_from_1900_2021):
+def fix_drought_metric_time(runoff_drought_data, data_with_time_from_1900_2021):
     """
     Changes the time coord of runoff_drought_data to that of data_with_correct_time.
 
@@ -23,7 +23,7 @@ def fix_runoff_drought_time(runoff_drought_data, data_with_time_from_1900_2021):
     return runoff_drought_data
 
 
-def process_runoff_drought_data(runoff_drought_data):
+def process_drought_metric_data(runoff_drought_data):
     """
     Constrains runoff data to defined Australia coords and regrids to 5km.
     Saves file to data directory.
@@ -44,30 +44,40 @@ def process_runoff_drought_data(runoff_drought_data):
 
 
 def main():
-    runoff_file = '/g/data/w97/amu561/Steven_CABLE_runs/drought_metrics_AWRA_ref/3-month/drought_metrics_AWRA_ref_qtot_scale_3_1960_2020.nc'
-    runoff_drought_ds = xr.open_dataset(runoff_file)
-    runoff_drought = runoff_drought_ds.timing
+    VARS = [
+        # 'runoff',
+        'soil_moisture'
+    ]
+    var_name = {
+        'runoff': 'qtot', 
+        'soil_moisture': 'sm',
+    }
 
-    precip_file = '/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc'
-    precip = xr.open_dataarray(precip_file)
+    for var in VARS:
+        drought_file = f'/g/data/w97/amu561/Steven_CABLE_runs/drought_metrics_AWRA_ref/3-month/drought_metrics_AWRA_ref_{var_name[var]}_scale_3_1960_2020.nc'
+        drought_ds = xr.open_dataset(drought_file)
+        drought_metric = drought_ds.timing
 
-    runoff_processed = process_runoff_drought_data(
-        fix_runoff_drought_time(
-            runoff_drought, precip
+        precip_file = '/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc'
+        precip = xr.open_dataarray(precip_file)
+
+        drought_metric_processed = process_drought_metric_data(
+            fix_drought_metric_time(
+                drought_metric, precip
+            )
         )
-    )
 
-    runoff_processed = runoff_processed.rename('Drought')
+        drought_metric_processed = drought_metric_processed.rename('Drought')
 
-    filepath_out = '/g/data/w97/mg5624/RF_project/drought_metric/runoff_percentile/'
+        filepath_out = f'/g/data/w97/mg5624/RF_project/drought_metric/{var}_percentile/'
 
-    if not os.path.exists(filepath_out):
-        os.makedirs(filepath_out)
+        if not os.path.exists(filepath_out):
+            os.makedirs(filepath_out)
 
-    filename = 'AWRA_runoff_percentile_drought_metric_monthly_1960-2020.nc'
+        filename = f'AWRA_{var}_percentile_drought_metric_monthly_1960-2020.nc'
 
-    runoff_processed.to_netcdf(filepath_out + filename)
+        drought_metric_processed.to_netcdf(filepath_out + filename)
+
 
 if __name__ == "__main__":
     main()
-    

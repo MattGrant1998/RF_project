@@ -1,13 +1,14 @@
 import xarray as xr
 import os
+import pandas as pd
 
 
-def fix_time_coord(precip_drought_data, data_with_correct_time):
+def fix_precip_time_coord(precip_drought_data, data_with_correct_time):
     """
     Changes the time coord of precip_drought_data to that of data_with_correct_time.
 
     Args:
-        precip_drought_data (xr.DataArray): data array of drought/no drought defined by precipitation
+        precip_drought_data (xr.DataArray): data array of drought/no drought defined by a precipitation
         data_with_correct_time (xr.DataArray): data array with monthly time coord from 1900 to 2021
 
     Returns:
@@ -25,7 +26,7 @@ def main():
     print('Loaded drought metric')
 
     precip = xr.open_dataarray('/g/data/w97/mg5624/RF_project/Precipitation/AGCD/AGCD_v1_precip_total_r005_monthly_1900_2021.nc')
-    precip_drought_correct_time = fix_time_coord(precip_drought, precip)
+    precip_drought_correct_time = fix_precip_time_coord(precip_drought, precip)
     print('corrected time coord of drought data')
 
     renamed_precip_drought = precip_drought_correct_time.rename('Drought')
