@@ -120,7 +120,7 @@ def save_stat_test_df(df, stat_test, model_type, measure, test_type='original'):
     Saves stats test data as csv file.
 
     Args:
-        df (pd.DataFrame): dataframe of stats test to save
+        df (xr.DataFrame): dataframe of stats test to save
         stat_test (str): statistical test which the data is for ('MK' or 'DW')
         model_type (str): the model type which the data is for ('1980' or '1911')
         measure (str): the drought measure ('events' or 'proba')
@@ -166,7 +166,7 @@ def load_drought_data(model, measure):
 
 MODELS = [
     '1911', 
-    # '1980'
+    '1980'
 ]
 MEASURES = [
     'proba', 
@@ -174,25 +174,25 @@ MEASURES = [
 ]
 test_type = [
     'original',
-    # 'hamed_rao'
+    'hamed_rao'
 ]
 
 
 def main():
     for measure in MEASURES:
         for model in MODELS:
-            save_stat_test_df(
-                calculate_DW_score(
-                    load_drought_data(model, measure)
-                ), 'DW', model, measure
-            )
+            # save_stat_test_df(
+            #     calculate_DW_score(
+            #         load_drought_data(model, measure)
+            #     ), 'DW', model, measure
+            # )
 
-            # for type in test_type:
-            #     save_stat_test_df(
-            #         find_MK_trendtest(
-            #             load_drought_data(model, measure), type
-            #         ), 'MK', model, measure, test_type=type
-            #     )
+            for type in test_type:
+                save_stat_test_df(
+                    find_MK_trendtest(
+                        load_drought_data(model, measure), type
+                    ), 'MK', model, measure, test_type=type
+                )
 
 
 if __name__ == "__main__":
