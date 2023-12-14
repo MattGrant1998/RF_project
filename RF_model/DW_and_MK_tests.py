@@ -5,6 +5,8 @@ import os
 from statsmodels.formula.api import ols
 from statsmodels.stats.stattools import durbin_watson
 import pymannkendall as mk
+from dask_jobqueue import PBSCluster
+from dask.distributed import Client
 
 
 datadir = '/g/data/w97/mg5624/RF_project/'
@@ -78,17 +80,20 @@ def calculate_DW_group(group, data_name, DW_upper_bound, DW_lower_bound):
     return pd.Series({"lat": lat, "lon": lon, "DW_score": DW_score, "DW_hyp": DW_hyp})
 
 
-def find_MK_trendtest(data, test_type):
+def find_MK_trendtest(data, test_type, year_from, year_to):
     """
     Computes the MK trendtest for each grid point in the data.
 
     Args:
         data (xr.DataArray): spatial and temporal data
+        test_type (str): MK trend test type being performed
+        year_from (int): year from whcih the trend goes from
+        year_to (int): year to which the trend goes to
 
     Returns:
         MK_data (pd.DataFrame): trend test result at each grid point
     """
-    print('MK')
+    data = data.sel(time=slice(year_from, year_to))
     data_name = data.name
     MK_df = pd.DataFrame()
     for i in data['lat'].values:
@@ -115,7 +120,47 @@ def find_MK_trendtest(data, test_type):
     return MK_df
 
 
-def save_stat_test_df(df, stat_test, model_type, measure, test_type='original'):
+# import dask
+# from dask import delayed
+# import dask.dataframe as dd
+
+# @dask.delayed
+# def compute_mk_trend(i, j, data_ij_df, test_type, data_name):
+#     if data_ij_df[data_name].isnull().values.all():
+#         MK_dict = {'lat': i, 'lon': j, 'MK_trend': np.nan, 'MK_slope': np.nan}
+#     else:
+#         if test_type == 'original':
+#             MK_result = mk.original_test(data_ij_df[data_name].values)
+#         elif test_type == 'hamed_rao':
+#             MK_result = mk.hamed_rao_modification_test(data_ij_df[data_name].values)
+
+#         MK_dict = {'lat': i, 'lon': j, 'MK_trend': MK_result.trend, 'MK_slope': MK_result.slope}
+
+#     MK_df_ij = pd.DataFrame([MK_dict])
+#     return MK_df_ij
+
+
+# def find_MK_trendtest(data, test_type):
+#     print('MK')
+#     data_name = data.name
+#     MK_dask_list = []
+
+#     for i in data['lat'].values:
+#         for j in data['lon'].values:
+#             data_ij = data.sel(lat=i, lon=j)
+#             data_ij_df = data_ij.to_dataframe()
+#             data_ij_df.reset_index(inplace=True)
+
+#             MK_dask = compute_mk_trend(i, j, data_ij_df, test_type, data_name)
+#             MK_dask_list.append(MK_dask)
+
+#     MK_dask_results = dask.compute(*MK_dask_list)
+#     MK_df = pd.concat(MK_dask_results, ignore_index=True)
+
+#     return MK_df
+
+
+def save_stat_test_df(df, stat_test, model_type, measure, year_from, year_to, test_type='original'):
     """
     Saves stats test data as csv file.
 
@@ -133,9 +178,9 @@ def save_stat_test_df(df, stat_test, model_type, measure, test_type='original'):
         os.makedirs(filepath)
 
     if stat_test == 'MK':
-        filename = f'{test_type}_{stat_test}_test_drought_prediction_{model_type}_model.csv'
+        filename = f'{year_from}-{year_to}_{test_type}_{stat_test}_test_drought_{measure}_{model_type}_model.csv'
     else:
-        filename = f'{stat_test}_test_drought_{measure}_{model_type}_model.csv'
+        filename = f'{year_from}-{year_to}_{stat_test}_test_drought_{measure}_{model_type}_model.csv'
 
     df.to_csv(filepath + filename)
 
@@ -166,14 +211,30 @@ def load_drought_data(model, measure):
 
 MODELS = [
     '1911', 
-    '1980'
+    # '1980'
 ]
+
+YEARS = {
+    '1911': [
+        # ['1911', '2021'], 
+        # ['1950', '2021'], 
+        # ['1980', '2021'],
+        ['1950', '1980']
+    ],
+
+    '1980': [
+        ['1980', '2021']
+    ],
+}
+
 MEASURES = [
     'proba', 
     # 'events'
 ]
+
+
 test_type = [
-    'original',
+    # 'original',
     'hamed_rao'
 ]
 
@@ -181,22 +242,22 @@ test_type = [
 def main():
     for measure in MEASURES:
         for model in MODELS:
-            # save_stat_test_df(
-            #     calculate_DW_score(
-            #         load_drought_data(model, measure)
-            #     ), 'DW', model, measure
-            # )
+            for years in YEARS[model]:
+                # save_stat_test_df(
+                #     calculate_DW_score(
+                #         load_drought_data(model, measure)
+                #     ), 'DW', model, measure
+                # )
 
-            for type in test_type:
-                save_stat_test_df(
-                    find_MK_trendtest(
-                        load_drought_data(model, measure), type
-                    ), 'MK', model, measure, test_type=type
-                )
+                start_year = years[0]
+                end_year = years[-1]
+                for type in test_type:
+                    save_stat_test_df(
+                        find_MK_trendtest(
+                            load_drought_data(model, measure), type, start_year, end_year
+                        ), 'MK', model, measure, start_year, end_year, test_type=type
+                    )
 
 
 if __name__ == "__main__":
     main()
-
-
-
