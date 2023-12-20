@@ -115,8 +115,15 @@ def find_MK_trendtest(data, test_type, year_from, year_to):
                     MK_result = mk.original_test(data_ij_df[data_name].values)
                 elif test_type == 'hamed_rao':
                     MK_result = mk.hamed_rao_modification_test(data_ij_df[data_name].values)
-    
-                MK_dict = {'lat': i, 'lon': j, 'MK_trend': MK_result.trend, 'MK_slope': MK_result.slope}
+                elif test_type == 'yue_wang':
+                    MK_result = mk.yue_wang_modification_test(data_ij_df[data_name].values)
+                elif test_type == 'seasonal_sens_slope':
+                    MK_result = mk.seasonal_sens_slope(data_ij_df[data_name].values)
+
+                if test_type == 'seasonal_sens_slope':
+                    MK_dict = {'lat': i, 'lon': j, 'MK_slope': MK_result.slope}
+                else:
+                    MK_dict = {'lat': i, 'lon': j, 'MK_trend': MK_result.trend, 'MK_slope': MK_result.slope}
                 
             MK_df_ij = pd.DataFrame([MK_dict])
             MK_df = pd.concat((MK_df, MK_df_ij))
@@ -177,7 +184,7 @@ def save_stat_test_df(data, stat_test, model_type, measure, year_from, year_to, 
         test_type (str): matters for stat_test = 'MK' only, type of MK test that was conducted
                          ('original' (default) or 'hamed_rao')
     """
-    filepath = datadir + f'{stat_test}_test/drought_{measure}/{model_type}_model/'
+    filepath = datadir + f'{stat_test}_test/drought_{measure}/{model_type}_model/{test_type}/'
 
     if not os.path.exists(filepath):
         os.makedirs(filepath)
@@ -185,8 +192,11 @@ def save_stat_test_df(data, stat_test, model_type, measure, year_from, year_to, 
     if stat_test == 'MK':
         df = find_MK_trendtest(data, test_type, year_from, year_to)
         filename = f'{year_from}-{year_to}_{test_type}_{stat_test}_test_drought_{measure}_{model_type}_model.csv'
+        print(season)
         if season != 'None':
+            print(season)
             filename = f'{season}_{filename}'
+        print(filepath + filename)
     elif stat_test == 'DW':
         df = calculate_DW_score(data)
         filename = f'{year_from}-{year_to}_{stat_test}_test_drought_{measure}_{model_type}_model.csv'
@@ -265,7 +275,8 @@ def load_drought_data(model, measure, season='None'):
 
 MODELS = [
     '1911', 
-    '1980'
+    '1980',
+    # 'test',
 ]
 
 YEARS = {
@@ -273,12 +284,16 @@ YEARS = {
         ['1911', '2021'], 
         ['1950', '2021'], 
         ['1980', '2021'],
-        ['1950', '1980']
+        ['1950', '1980'],
     ],
 
     '1980': [
-        ['1980', '2021']
+        ['1980', '2021'],
     ],
+
+    'test': [
+        ['1981', '1983']
+    ]
 }
 
 # MEASURES = [
@@ -287,16 +302,18 @@ YEARS = {
 # ]
 
 SEASONS = [
-    'None',
+    # 'None',
     'DJF',
     'MAM',
     'JJA',
-    'SON'
+    'SON',
 ]
 
 test_type = [
     # 'original',
-    'hamed_rao'
+    'hamed_rao',
+    # 'yue_wang',
+    # 'seasonal_sens_slope',
 ]
 
 
@@ -313,23 +330,24 @@ def main():
             end_year = years[-1]
             for type in test_type:
                 for season in SEASONS:
+                    print('defined season:', season)
                     save_stat_test_df(
                         load_drought_data(
                             model, 'proba', season=season
                         ), 
-                        'MK', model, 'proba', start_year, end_year, test_type=type
+                        'MK', model, 'proba', start_year, end_year, season=season, test_type=type
                     )
         
 
-                save_stat_test_df(
-                    sum_drought_events_per_time_period(
-                        load_drought_data(
-                            model, 'events'
-                        ), 
-                        5
-                    ), 
-                    'MK', model, 'events', start_year, end_year, test_type=type
-                )
+                # save_stat_test_df(
+                #     sum_drought_events_per_time_period(
+                #         load_drought_data(
+                #             model, 'events'
+                #         ), 
+                #         5
+                #     ), 
+                #     'MK', model, 'events', start_year, end_year, test_type=type
+                # )
                 
 
 
