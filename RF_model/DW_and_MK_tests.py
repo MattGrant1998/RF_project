@@ -230,8 +230,8 @@ def find_season_data(data, season, aggregate_by):
     elif aggregate_by == 'mean':
         data_allseas = data.resample(time='QS-DEC').mean(dim='time').isel(time=slice(1, -1))
 
-    data_seas = data_allseas.where(data_allseas['time.month'] == season_dict[season])
-
+    data_seas = data_allseas.sel(time=data_allseas['time.month'] == season_dict[season])
+    print(data_seas)
     return data_seas
 
 
@@ -250,25 +250,20 @@ def load_drought_data(model, measure, season='None'):
     file = datadir + f'drought_prediction/{model}_model/drought_prediction_dataset_{model}_model.nc'
     drought_ds = xr.open_dataset(file)
 
-    measure_dict = {
-        'events': {
-            'None': drought_ds.drought,
-            'DJF': find_season_data(drought_ds.drought, 'DJF', 'sum'),
-            'MAM': find_season_data(drought_ds.drought, 'MAM', 'sum'),
-            'JJA': find_season_data(drought_ds.drought, 'JJA', 'sum'),
-            'SON': find_season_data(drought_ds.drought, 'SON', 'sum'),
-        },
-
-        'proba': {
-            'None': drought_ds.drought_proba,
-            'DJF': find_season_data(drought_ds.drought_proba, 'DJF', 'mean'),
-            'MAM': find_season_data(drought_ds.drought_proba, 'MAM', 'mean'),
-            'JJA': find_season_data(drought_ds.drought_proba, 'JJA', 'mean'),
-            'SON': find_season_data(drought_ds.drought_proba, 'SON', 'mean'),
-        }
+    aggregate_dict = {
+        'events': 'sum',
+        'proba': 'mean',
     }
 
-    data = measure_dict[measure][season]
+    measure_dict = {
+        'events': drought_ds.drought,
+        'proba': drought_ds.drought_proba,
+    }
+
+    if season == 'None':
+        data = measure_dict[measure]
+    else:
+        data = find_season_data(measure_dict[measure], season, aggregate_dict[measure])
 
     return data
     
@@ -302,7 +297,7 @@ YEARS = {
 # ]
 
 SEASONS = [
-    # 'None',
+    'None',
     'DJF',
     'MAM',
     'JJA',
@@ -310,44 +305,57 @@ SEASONS = [
 ]
 
 test_type = [
-    # 'original',
+    'original',
     'hamed_rao',
-    # 'yue_wang',
-    # 'seasonal_sens_slope',
+    'yue_wang',
+    'seasonal_sens_slope',
 ]
 
 
 def main():
-    for model in MODELS:
-        for years in YEARS[model]:
-            # save_stat_test_df(
-            #     calculate_DW_score(
-            #         load_drought_data(model, measure)
-            #     ), 'DW', model, measure
-            # )
+    save_stat_test_df(
+        load_drought_data(
+            '1911', 'proba', season='DJF'
+        ), 
+        'MK', '1911', 'proba', '1911', '1950', test_type='hamed_rao'
+    )
+    # for model in MODELS:
+    #     for years in YEARS[model]:
+    #         # save_stat_test_df(
+    #         #     calculate_DW_score(
+    #         #         load_drought_data(model, measure)
+    #         #     ), 'DW', model, measure
+    #         # )
 
-            start_year = years[0]
-            end_year = years[-1]
-            for type in test_type:
-                for season in SEASONS:
-                    print('defined season:', season)
-                    save_stat_test_df(
-                        load_drought_data(
-                            model, 'proba', season=season
-                        ), 
-                        'MK', model, 'proba', start_year, end_year, season=season, test_type=type
-                    )
-        
+    #         start_year = years[0]
+    #         end_year = years[-1]
+    #         for type in test_type:
+    #             if type == 'seasonal_sens_slope':
+    #                 save_stat_test_df(
+    #                     load_drought_data(
+    #                         model, 'proba', season=season
+    #                     ), 
+    #                     'MK', model, 'proba', start_year, end_year, test_type=type
+    #                 )
+    #             else:
+    #                 for season in SEASONS:
+    #                     save_stat_test_df(
+    #                         load_drought_data(
+    #                             model, 'proba', season=season
+    #                         ), 
+    #                         'MK', model, 'proba', start_year, end_year, season=season, test_type=type
+    #                     )
+            
 
-                # save_stat_test_df(
-                #     sum_drought_events_per_time_period(
-                #         load_drought_data(
-                #             model, 'events'
-                #         ), 
-                #         5
-                #     ), 
-                #     'MK', model, 'events', start_year, end_year, test_type=type
-                # )
+    #             save_stat_test_df(
+    #                 sum_drought_events_per_time_period(
+    #                     load_drought_data(
+    #                         model, 'events'
+    #                     ), 
+    #                     5
+    #                 ), 
+    #                 'MK', model, 'events', start_year, end_year, test_type=type
+    #             )
                 
 
 
